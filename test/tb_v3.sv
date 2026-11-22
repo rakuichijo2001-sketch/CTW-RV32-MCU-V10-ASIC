@@ -33,9 +33,14 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
     end endgenerate
 `ifdef ASIC
     wire [7:0] uo;
+`ifdef GL_TEST
+    // Gate-level power ports are inout: connect nets, not constant expressions.
+    supply1 vpwr;
+    supply0 vgnd;
+`endif
     tt_um_ctw_rv32_mcu dut(
 `ifdef GL_TEST
-        .VPWR(1'b1),.VGND(1'b0),
+        .VPWR(vpwr),.VGND(vgnd),
 `endif
         .ui_in({sensor_rx,sensor_d,3'b0,!key[1]}),.uio_in(bus),.uo_out(uo),.uio_out(mcu_o),
         .uio_oe(mcu_oe),.ena(ena),.clk(clk),.rst_n(rst_n && key[0])
