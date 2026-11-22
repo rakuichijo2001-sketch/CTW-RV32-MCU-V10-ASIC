@@ -167,3 +167,5 @@ See [`docs/V10_SIGNOFF.md`](docs/V10_SIGNOFF.md) for a gate-by-gate matrix.
 - The PSRAM `CS#` safety timeout still parks the CPU on a RAM bus fault;
   it requires an external reset. This is deliberate: avoid unsafe memory
   transactions once the 6 µs safety margin expires.
+#   C T W - R V 3 2 - M C U - V 1 0 - A S I C  
+ 
