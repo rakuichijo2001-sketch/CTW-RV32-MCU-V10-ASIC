@@ -1,10 +1,10 @@
 {
-  "release_name": "CTW-RV32-MCU-V10-ASIC-QSPI-READ-TIMING-FIX",
+  "release_name": "CTW-RV32-MCU-V10-EXPERIMENT-3X2-20MHZ-AREA-ISOLATION",
   "prepared_utc": "2026-11-22",
   "project": "CTW-RV32-MCU-V10-ASIC-STAGE1",
   "claimed_asic_verified": false,
   "sha256": {
-    "info.yaml": "15e01b688697cd4abe652fe4446b90afa15fd60d2584a845bcedde83325f62e1",
+    "info.yaml": "adcc6321514c24ad899c91f644a2a9c3ffaaa56b379c98d2124c7dd24b442b78",
     "src/config.json": "15ae52d5d571fac2ce969d2a629c68b36333c878fabb017d883c6a9afa29714e",
     ".github/workflows/gds.yaml": "7c90c5363e9f4770e1e6dd266844cdf918b0ef679dbf359d8e278b8c66dabff6",
     "src/alu.v": "66165eddc0cbed614ec972cd2d8e7555a47476da08c8bc81d64450cdd66f1483",
