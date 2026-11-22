@@ -26,8 +26,17 @@ def main():
     for r,h in manifest['sha256'].items():
         p=ROOT/r
         if not p.is_file(): errs.append('MISSING freeze file: '+r);continue
-        calc=hashlib.sha256(p.read_bytes()).hexdigest()
-        if calc!=h: errs.append('CHANGED since freeze: '+r)
+        raw=p.read_bytes()
+        calc=hashlib.sha256(raw).hexdigest()
+        if calc!=h:
+            # Git normalizes text to LF, while Windows may check out CRLF.
+            # Accept only that byte-for-byte line-ending conversion; do not
+            # suppress real RTL/source modifications or regenerate the manifest.
+            normalized=raw.replace(b'\r\n',b'\n')
+            if normalized!=raw and hashlib.sha256(normalized).hexdigest()==h:
+                notes.append('CRLF checkout matches frozen LF content: '+r)
+            else:
+                errs.append('CHANGED since freeze: '+r)
     if get_info_field(info,'top_module')!='tt_um_ctw_rv32_mcu': errs.append('Top mismatch')
     if get_info_field(info,'tiles')!='4x2': errs.append('Tile setting changed')
     if get_info_field(info,'clock_hz')!='20000000': errs.append('ASIC clock_hz mismatch')
