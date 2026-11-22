@@ -5,7 +5,8 @@
 module ctw_mcu_pads #(
     parameter integer CLK_HZ=20000000,
     parameter integer UART_DIV=174,
-    parameter integer POWERUP_US=6000
+    parameter integer POWERUP_US=6000,
+    parameter [2:0] QSPI_READ_DELAY_CFG=3'b000
 )(
     input wire [7:0] ui_in, uio_in,
     output wire [7:0] uo_out, uio_out, uio_oe,
@@ -114,7 +115,7 @@ module ctw_mcu_pads #(
         .wdt_kick(wdt_kick), .wdt_event_count(wdt_events),
         .wdt_last_reset(wdt_cause), .wdt_elapsed_ms(wdt_elapsed_ms),
         .uart_rx(ui_in[7]),
-        .uart_tx(uart_tx), .delay_cfg(3'b000), .dq_in(dq_in),
+        .uart_tx(uart_tx), .delay_cfg(QSPI_READ_DELAY_CFG), .dq_in(dq_in),
         .dq_out(cpu_dq), .dq_oe(cpu_oe), .sck(cpu_sck), .flash_cs_n(cpu_fcs),
         .rama_cs_n(cpu_acs), .ramb_cs_n(cpu_bcs), .enabled(cpu_active)
     );
