@@ -35,8 +35,10 @@ task check_bank(input integer bank);
     #1;
     if ($time-started>6100 || $time-started<5800)
         $fatal(1,"guard ran at %0d ns, clock %0d ns", $time-started,CLK_NS);
-    if (out_data!==8'hc1 || oe!==8'h09 || gp[7:5]!==3'b111 || dut.cpu_active)
-        $fatal(1,"guard did not park CS/clock/DQ and reset CPU");
+    // V6+ pinout: RAM CS# live on uo[5:6], not uio[7:6].
+    // On guard fault: Flash CS#=1, SCK=0, DQ=0, GPIO/I2C pads tri-state.
+    if (out_data!==8'h01 || oe!==8'h09 || gp[7:5]!==3'b111 || dut.cpu_active)
+        $fatal(1,"guard failed to park pads/reset CPU: uio_out=%02h uio_oe=%02h uo[7:5]=%b cpu_active=%b", out_data, oe, gp[7:5], dut.cpu_active);
     #12000;
     if (gp[7:5]!==3'b111) $fatal(1,"guard was not sticky");
     rst_n=0;
