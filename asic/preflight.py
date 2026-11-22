@@ -38,7 +38,7 @@ def main():
             else:
                 errs.append('CHANGED since freeze: '+r)
     if get_info_field(info,'top_module')!='tt_um_ctw_rv32_mcu': errs.append('Top mismatch')
-    if get_info_field(info,'tiles')!='4x2': errs.append('Tile setting changed')
+    if get_info_field(info,'tiles')!='3x2': errs.append('Tile setting changed')
     if get_info_field(info,'clock_hz')!='20000000': errs.append('ASIC clock_hz mismatch')
     if get_info_field(info,'yaml_version')!='6': errs.append('Unexpected YAML version')
     if config.get('CLOCK_PERIOD')!=50: errs.append('CLOCK_PERIOD not 50ns')
@@ -67,7 +67,7 @@ def main():
     if config.get('RUN_KLAYOUT_DRC')==0:notes.append('KLayout DRC disabled in project config; require official precheck/full signoff')
     if config.get('RUN_KLAYOUT_XOR')==0:notes.append('KLayout XOR disabled in config; do not claim XOR signoff')
     print('CTW V10 ASIC STAGE-1 PREFLIGHT (offline, no PDK/STA)')
-    print('Baseline: V10-GP-TP-GPR-FIX  |  TT SKY26d/sky130A')
+    print('Experiment: 3x2 tiles at 20MHz (PPA area-isolation); NOT SIGNOFF | TT SKY26d/sky130A')
     print('Top:',get_info_field(info,'top_module'))
     print('RTL files:',len(sl),'| modules found:',len(all_modules),'| tiles:',get_info_field(info,'tiles'))
     print('ASIC clock target: 20 MHz (50 ns) | manifest files:',len(manifest['sha256']))

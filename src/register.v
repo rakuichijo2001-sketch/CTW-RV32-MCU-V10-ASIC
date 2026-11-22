@@ -43,7 +43,8 @@ module tinyqv_registers #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
                 `elsif ICE40
                 assign reg_buf = {registers[i][3:0], registers[i][31:8]};
                 `elsif SCL_sky130_fd_sc_hd
-                sky130_fd_sc_hd__dlygate4sd3_1 i_regbuf[31:4] ( .X(reg_buf), .A({registers[i][3:0], registers[i][31:8]}) );
+                // PPA experiment: remove fixed delay; post-layout hold STA is mandatory.
+                assign reg_buf = {registers[i][3:0], registers[i][31:8]};
                 `else
                 assign reg_buf = {registers[i][3:0], registers[i][31:8]};
                 `endif
