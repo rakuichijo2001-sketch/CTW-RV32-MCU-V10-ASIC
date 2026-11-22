@@ -1,7 +1,8 @@
 `timescale 1ns/1ps
 module tb_v3 #(parameter integer TEST_PAD_NS=30);
 `ifdef ASIC
-    localparam integer CLK_NS=100;
+    // Match the 20 MHz ASIC clock (50 ns) configured in info.yaml/src/config.json.
+    localparam integer CLK_NS=50;
     localparam MODEL=0, ASIC_MODE=1;
 `elsif EXTERNAL
     localparam integer CLK_NS=20;
