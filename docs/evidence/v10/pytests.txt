@@ -1,0 +1,21 @@
+test_correct (test_irq_tool.TestIrqTool.test_correct) ... ok
+test_esp_error (test_irq_tool.TestIrqTool.test_esp_error) ... ok
+test_wrong_order (test_irq_tool.TestIrqTool.test_wrong_order) ... ok
+test_all_frames (test_sensor_tool.SensorToolTest.test_all_frames) ... ok
+test_bad_result_rejected (test_sensor_tool.SensorToolTest.test_bad_result_rejected) ... ok
+test_early_pass_rejected (test_sensor_tool.SensorToolTest.test_early_pass_rejected) ... ok
+test_esp_error_reported (test_sensor_tool.SensorToolTest.test_esp_error_reported) ... ok
+test_binary_and_integrity (test_uploader.UploaderTest.test_binary_and_integrity) ... ok
+test_reject_different_crc (test_uploader.UploaderTest.test_reject_different_crc) ... ok
+test_reject_failed_target (test_uploader.UploaderTest.test_reject_failed_target) ... ok
+test_advancement_matches_sequential_chunks (test_v10_reference.StressReferenceTest.test_advancement_matches_sequential_chunks) ... ok
+test_frame_parse (test_v10_reference.StressReferenceTest.test_frame_parse) ... ok
+test_frame_rejects_wrong_opcode (test_v10_reference.StressReferenceTest.test_frame_rejects_wrong_opcode) ... ok
+test_prng_is_bounded (test_v10_reference.StressReferenceTest.test_prng_is_bounded) ... ok
+test_mismatch (test_v9_tool.V9ToolTest.test_mismatch) ... ok
+test_valid (test_v9_tool.V9ToolTest.test_valid) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.002s
+
+OK

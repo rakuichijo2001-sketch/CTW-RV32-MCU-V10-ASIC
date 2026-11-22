@@ -1,0 +1,28 @@
+{
+  "release_name": "CTW-RV32-MCU-V10-GP-TP-GPR-FIX",
+  "prepared_utc": "2026-11-22",
+  "project": "CTW-RV32-MCU-V10-ASIC-STAGE1",
+  "claimed_asic_verified": false,
+  "sha256": {
+    "info.yaml": "15e01b688697cd4abe652fe4446b90afa15fd60d2584a845bcedde83325f62e1",
+    "src/config.json": "15ae52d5d571fac2ce969d2a629c68b36333c878fabb017d883c6a9afa29714e",
+    ".github/workflows/gds.yaml": "7c90c5363e9f4770e1e6dd266844cdf918b0ef679dbf359d8e278b8c66dabff6",
+    "src/alu.v": "66165eddc0cbed614ec972cd2d8e7555a47476da08c8bc81d64450cdd66f1483",
+    "src/core.v": "24d4ba3cc0e4f4915d9ba5012e6ee6a54b6159e08c5a1603c66ea256f8d54851",
+    "src/counter.v": "351600c1b09ab9182e3e6ed2aa9a6f102fc516a428bc08a98df609d877e5db2d",
+    "src/cpu.v": "18a09b6ebfc4d97e89478bee4f6a81b212787bee21a028eca6f6959f0072f863",
+    "src/ctw_mcu.v": "cf05017bd58ed0e76a46c517eaea00ea90d4977d7cb08d9cc7dd30bb8e248bc3",
+    "src/ctw_mcu_pads.v": "2a6e8b6cc541ae6a0e06795e37f46d6df12930d663075da71f412aac10be3d60",
+    "src/ctw_qspi_boot.v": "ee25e71a97505b49014ad28ed2f116adbc8740fa5f8dfee60fd077f495146e7b",
+    "src/ctw_uart.v": "b6be93f886ae78c316792de512415bac93813305e76b0f4a466e775db399d62a",
+    "src/ctw_pwm.v": "f99b619367da2f15797474be4cbbc7916c91a29ee7832086d4639f3af139997b",
+    "src/ctw_i2c_master.v": "98982ac506a68b5523bf8d829b3d5f626ea9d4f39a6c502959022f7bad42c0d5",
+    "src/ctw_sys_watchdog.v": "ad7ca6ad568b52c3e0df91aea470a90419d00a4170038b10d10b0e0afd269755",
+    "src/decode.v": "44e8dd9acceb4a9f4f3a758f0d35969156ac3dfc289076fdd42b4943236fc24d",
+    "src/hasemi_mem_ctrl_stream.v": "e27dda0be3bca7a5f3be6a1d9158991c2c650e1ca7a19bf139a829dc3e767224",
+    "src/hasemi_tinyqv_pio.v": "25838f37a81f6394893f3baedd57db1b916a5441dade7aeba2ffb1ce36a69729",
+    "src/qspi_ctrl.v": "2a6e5264f92f9d411d92c93e57f3de46b2b23d64482c3f1cdedf3af757c0a406",
+    "src/register.v": "b3d7dab0ecbb43870fb79489ab0bad1d1532d376f6d284e3297ddc65041ad80e",
+    "src/tt_um_ctw_rv32_mcu.v": "9000b5f4001f97ead6462b4bfa289497a07959a5c642e7568367d25551887889"
+  }
+}

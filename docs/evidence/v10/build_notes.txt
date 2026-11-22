@@ -1,0 +1,8 @@
+V10 PRE-PD STATUS (environment check)
+Clang RV32EC/Zicsr firmware built: yes
+Arduino ESP32 C++ mock syntax: yes
+Python unit tests: 16 PASS
+Icarus/Verilator/Yosys: not installed here, no RTL signoff claim
+Quartus Fitter/TimeQuest: not available here
+Physical DE10/ESP32 V10: not yet run
+SKY130 GDS/STA/DRC/LVS/precheck: not yet run

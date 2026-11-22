@@ -1,0 +1,21 @@
+test -s test/smoke_a.hex && test -s test/smoke_b.hex
+test -s test/smoke_a.hex && test -s test/smoke_b.hex
+mkdir -p build
+mkdir -p build
+/workspace/scratch/4903816140fc/.sensor-private/eda/usr/bin/iverilog -B /workspace/scratch/4903816140fc/.sensor-private/eda/usr/lib/x86_64-linux-gnu/ivl -g2012 -s tb_v3   -o build/test-model src/alu.v src/core.v src/counter.v src/cpu.v src/ctw_mcu.v src/ctw_mcu_pads.v src/ctw_qspi_boot.v src/ctw_uart.v src/decode.v src/hasemi_mem_ctrl_stream.v src/hasemi_tinyqv_pio.v src/qspi_ctrl.v src/register.v src/tt_um_ctw_rv32_mcu.v fpga/ctw_flash_model.sv fpga/ctw_memory_models.sv fpga/ctw_psram_mode_model.sv fpga/ctw_psram_qpi_model.sv ctw_de10_top.sv test/tb_v3.sv
+/workspace/scratch/4903816140fc/.sensor-private/eda/usr/bin/iverilog -B /workspace/scratch/4903816140fc/.sensor-private/eda/usr/lib/x86_64-linux-gnu/ivl -g2012 -s tb_v3 -DEXTERNAL  -o build/test-external src/alu.v src/core.v src/counter.v src/cpu.v src/ctw_mcu.v src/ctw_mcu_pads.v src/ctw_qspi_boot.v src/ctw_uart.v src/decode.v src/hasemi_mem_ctrl_stream.v src/hasemi_tinyqv_pio.v src/qspi_ctrl.v src/register.v src/tt_um_ctw_rv32_mcu.v fpga/ctw_flash_model.sv fpga/ctw_memory_models.sv fpga/ctw_psram_mode_model.sv fpga/ctw_psram_qpi_model.sv ctw_de10_top.sv test/tb_v3.sv
+/workspace/scratch/4903816140fc/.sensor-private/eda/usr/bin/vvp build/test-model
+/workspace/scratch/4903816140fc/.sensor-private/eda/usr/bin/vvp build/test-external
+PASS image A: JEDEC, WREN/WIP, erase, NOR 1-to-0 writes and full 808-byte SPI readback
+PASS image A: automatic warm-memory init and LED=a4 after upload and KEY0 reset
+PASS image B: JEDEC, WREN/WIP, erase, NOR 1-to-0 writes and full 808-byte SPI readback
+PASS image B: automatic warm-memory init and LED=58 after upload and KEY0 reset
+PASS V6 model=1 asic=0, max PSRAM CS-low 3400 ns
+test/tb_v3.sv:379: $finish called at 45031520000 (1ps)
+PASS image A: JEDEC, WREN/WIP, erase, NOR 1-to-0 writes and full 808-byte SPI readback
+PASS image A: automatic warm-memory init and LED=a4 after upload and KEY0 reset
+PASS image B: JEDEC, WREN/WIP, erase, NOR 1-to-0 writes and full 808-byte SPI readback
+PASS image B: automatic warm-memory init and LED=58 after upload and KEY0 reset
+PASS cold-memory reboot from retained Flash image without a programmer
+PASS V6 model=0 asic=0, max PSRAM CS-low 3400 ns
+test/tb_v3.sv:379: $finish called at 51274920000 (1ps)

@@ -1,0 +1,15 @@
+Candidate release: V10 RV32EC ISA torture + ASIC 20 MHz clock target
+Source baseline: CTW-RV32-MCU-V10-CPU-BOOT-FIX
+User FPGA legacy PASS: 8-hour soak, 100 resets (reported in conversation)
+This environment:
+ - Clang 17 compiled ISA torture firmware for -march=rv32ec_zicsr -mabi=ilp32e
+ - LLVM objcopy emitted prebuilt ISA torture and GP/TP strict binaries
+ - 20/20 Python unit tests PASS
+ - clock_audit.py consistency PASS: ASIC 20 MHz target, FPGA 50 MHz unchanged
+ - ONE Quartus project, unchanged DE10 top and QSF
+ - Original v10_qualification.bin CRC32 BBE53C4E unchanged
+ - No Icarus/Verilator/Yosys/Quartus/ASIC STA tools available
+ - ISA torture FPGA hardware execution NOT YET performed
+ - ASIC 20 MHz synthesis/P&R/timing closure NOT YET performed
+ - Strict GP/TP test EXPECTED to fail because of stock TinyQV hardwiring of x3/x4
+Current status: test candidate only; NOT RTL/ISA/ASIC signoff.

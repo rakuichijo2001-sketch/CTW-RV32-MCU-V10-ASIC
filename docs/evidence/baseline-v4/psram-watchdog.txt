@@ -1,0 +1,11 @@
+mkdir -p build
+set -e; for period in 20 100; do \
+  /tmp/ctw-v2-seed/iv-ctw -g2012 -Ptb_ram_guard.CLK_NS=$period -s tb_ram_guard -o build/guard-$period src/alu.v src/core.v src/counter.v src/cpu.v src/ctw_mcu.v src/ctw_mcu_pads.v src/ctw_qspi_boot.v src/ctw_uart.v src/decode.v src/hasemi_mem_ctrl_stream.v src/hasemi_tinyqv_pio.v src/qspi_ctrl.v src/register.v src/tt_um_ctw_rv32_mcu.v test/reference/tb_ram_guard.sv; \
+  /tmp/ctw-eda/usr/bin/vvp build/guard-$period; \
+done
+PASS bank 0 watchdog at 50 MHz: deselect safely and latch failure until reset
+PASS bank 1 watchdog at 50 MHz: deselect safely and latch failure until reset
+test/reference/tb_ram_guard.sv:49: $finish called at 36332000 (1ps)
+PASS bank 0 watchdog at 10 MHz: deselect safely and latch failure until reset
+PASS bank 1 watchdog at 10 MHz: deselect safely and latch failure until reset
+test/reference/tb_ram_guard.sv:49: $finish called at 37652000 (1ps)

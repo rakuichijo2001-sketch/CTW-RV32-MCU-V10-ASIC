@@ -1,0 +1,7 @@
+mkdir -p build
+/workspace/scratch/4903816140fc/.sensor-private/py/bin/yowasp-yosys -Q -q -l build/yosys.log -p "read_verilog src/alu.v src/core.v src/counter.v src/cpu.v src/ctw_mcu.v src/ctw_mcu_pads.v src/ctw_qspi_boot.v src/ctw_uart.v src/decode.v src/hasemi_mem_ctrl_stream.v src/hasemi_tinyqv_pio.v src/qspi_ctrl.v src/register.v src/tt_um_ctw_rv32_mcu.v; hierarchy -check -top tt_um_ctw_rv32_mcu; synth -flatten -top tt_um_ctw_rv32_mcu; check -assert; stat; write_verilog -noattr build/mcu-generic.v"
+Warning: Replacing memory \registers with list of registers. See src/register.v:36
+/workspace/scratch/4903816140fc/.sensor-private/eda/usr/bin/iverilog -B /workspace/scratch/4903816140fc/.sensor-private/eda/usr/lib/x86_64-linux-gnu/ivl -g2012 -DASIC -DGATE_SMOKE -s tb_v3 -o build/tb-gate build/mcu-generic.v fpga/ctw_flash_model.sv fpga/ctw_memory_models.sv fpga/ctw_psram_mode_model.sv fpga/ctw_psram_qpi_model.sv test/tb_v3.sv
+/workspace/scratch/4903816140fc/.sensor-private/eda/usr/bin/vvp build/tb-gate
+PASS V4 gate: cold and warm boot, dual PSRAM, async reset and ena, max PSRAM CS-low 4400 ns
+test/tb_v3.sv:342: $finish called at 90005203000 (1ps)

@@ -1,0 +1,1 @@
+# The SystemVerilog testbench uses only Icarus and Python standard library.

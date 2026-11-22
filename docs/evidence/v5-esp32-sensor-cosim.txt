@@ -1,0 +1,24 @@
+READY
+ERR CRC
+READY
+OK 0808 ECD7507F RUN
+READY
+OK 0808 1005DA92 RUN
+READY
+ERR JEDEC got 00 00 00 @2MHz; 00 00 00 @250kHz; expected EF 70 18
+READY
+OK 0808 ECD7507F RUN
+PASS sketch and RTL pads, runtime A/B upload, KEY0 reboot, CRC and JEDEC error/retry without contention
+READY
+OK 0284 BC8BA57C RUN
+SAMPLE 7 28
+SAMPLE 0 7
+SAMPLE 1 10
+SAMPLE 6 25
+SAMPLE 2 13
+SAMPLE 5 22
+SAMPLE 3 16
+SAMPLE 4 19
+SENSOR PASS 8
+ERR SENSOR timeout sample=7 bytes=0
+PASS GPIO and physical UART roundtrip for all 8 samples, then detect disconnected MCU TX

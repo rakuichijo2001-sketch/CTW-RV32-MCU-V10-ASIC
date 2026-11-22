@@ -1,0 +1,10 @@
+PASS sensor 7 ->  28 via UART
+PASS sensor 0 ->   7 via UART
+PASS sensor 1 ->  10 via UART
+PASS sensor 6 ->  25 via UART
+PASS sensor 2 ->  13 via UART
+PASS sensor 5 ->  22 via UART
+PASS sensor 3 ->  16 via UART
+PASS sensor 4 ->  19 via UART
+PASS sensor 5 ->  22 via UART
+PASS SENSOR_SMOKE 8 patterns plus reset with GPIO high at 10 MHz, modeled I/O delay 30 ns each way

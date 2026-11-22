@@ -1,0 +1,16 @@
+test -s test/sensor_demo.hex
+mkdir -p build
+/workspace/scratch/4903816140fc/.sensor-private/eda/usr/bin/iverilog -B /workspace/scratch/4903816140fc/.sensor-private/eda/usr/lib/x86_64-linux-gnu/ivl -g2012 -DASIC -DSENSOR_SMOKE -DDATASHEET_TIMING -s tb_v3 -o build/sensor-asic \
+  src/alu.v src/core.v src/counter.v src/cpu.v src/ctw_mcu.v src/ctw_mcu_pads.v src/ctw_qspi_boot.v src/ctw_uart.v src/decode.v src/hasemi_mem_ctrl_stream.v src/hasemi_tinyqv_pio.v src/qspi_ctrl.v src/register.v src/tt_um_ctw_rv32_mcu.v fpga/ctw_flash_model.sv fpga/ctw_memory_models.sv fpga/ctw_psram_mode_model.sv fpga/ctw_psram_qpi_model.sv test/reference/timed_memory_fixture.sv test/reference/psram_pin_reference.sv test/tb_v3.sv
+/workspace/scratch/4903816140fc/.sensor-private/eda/usr/bin/vvp build/sensor-asic
+PASS sensor 7 ->  28 via UART
+PASS sensor 0 ->   7 via UART
+PASS sensor 1 ->  10 via UART
+PASS sensor 6 ->  25 via UART
+PASS sensor 2 ->  13 via UART
+PASS sensor 5 ->  22 via UART
+PASS sensor 3 ->  16 via UART
+PASS sensor 4 ->  19 via UART
+PASS sensor 5 ->  22 via UART
+PASS SENSOR_SMOKE 8 patterns plus reset with GPIO high at 10 MHz, modeled I/O delay 30 ns each way
+test/tb_v3.sv:317: $finish called at 20581810000 (1ps)

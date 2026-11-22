@@ -1,0 +1,11 @@
+READY
+ERR CRC
+READY
+OK 0808 ECD7507F RUN
+READY
+OK 0808 1005DA92 RUN
+READY
+ERR JEDEC got 00 00 00 @2MHz; 00 00 00 @250kHz; expected EF 70 18
+READY
+OK 0808 ECD7507F RUN
+PASS sketch and RTL pads, runtime A/B upload, KEY0 reboot, CRC and JEDEC error/retry without contention

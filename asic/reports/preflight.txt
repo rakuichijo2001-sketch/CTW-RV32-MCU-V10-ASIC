@@ -1,0 +1,8 @@
+CTW V10 ASIC STAGE-1 PREFLIGHT (offline, no PDK/STA)
+Baseline: V10-GP-TP-GPR-FIX  |  TT SKY26d/sky130A
+Top: tt_um_ctw_rv32_mcu
+RTL files: 17 | modules found: 19 | tiles: 4x2
+ASIC clock target: 20 MHz (50 ns) | manifest files: 20
+NOTE: KLayout DRC disabled in project config; require official precheck/full signoff
+NOTE: KLayout XOR disabled in config; do not claim XOR signoff
+PREFLIGHT PASS — source/config manifest only; area, timing, physical signoff UNVERIFIED

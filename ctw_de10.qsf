@@ -1,0 +1,97 @@
+set_global_assignment -name FAMILY "Cyclone V"
+set_global_assignment -name DEVICE 5CSEBA6U23I7
+set_global_assignment -name TOP_LEVEL_ENTITY ctw_de10_top
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name SDC_FILE ctw_de10.sdc
+set_global_assignment -name VERILOG_FILE src/alu.v
+set_global_assignment -name VERILOG_FILE src/core.v
+set_global_assignment -name VERILOG_FILE src/counter.v
+set_global_assignment -name VERILOG_FILE src/cpu.v
+set_global_assignment -name VERILOG_FILE src/ctw_mcu.v
+set_global_assignment -name VERILOG_FILE src/ctw_uart.v
+set_global_assignment -name VERILOG_FILE src/decode.v
+set_global_assignment -name VERILOG_FILE src/hasemi_mem_ctrl_stream.v
+set_global_assignment -name VERILOG_FILE src/hasemi_tinyqv_pio.v
+set_global_assignment -name VERILOG_FILE src/qspi_ctrl.v
+set_global_assignment -name VERILOG_FILE src/register.v
+set_global_assignment -name VERILOG_FILE src/tt_um_ctw_rv32_mcu.v
+set_global_assignment -name SYSTEMVERILOG_FILE fpga/ctw_psram_qpi_model.sv
+set_location_assignment PIN_V11 -to CLOCK_50
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to CLOCK_50
+set_location_assignment PIN_AH17 -to KEY[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KEY[0]
+set_location_assignment PIN_AH16 -to KEY[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KEY[1]
+set_location_assignment PIN_W15 -to LED[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LED[0]
+set_location_assignment PIN_AA24 -to LED[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LED[1]
+set_location_assignment PIN_V16 -to LED[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LED[2]
+set_location_assignment PIN_V15 -to LED[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LED[3]
+set_location_assignment PIN_AF26 -to LED[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LED[4]
+set_location_assignment PIN_AE26 -to LED[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LED[5]
+set_location_assignment PIN_Y16 -to LED[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LED[6]
+set_location_assignment PIN_AA23 -to LED[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LED[7]
+set_global_assignment -name SYSTEMVERILOG_FILE ctw_de10_top.sv
+set_global_assignment -name SYSTEMVERILOG_FILE fpga/ctw_flash_model.sv
+set_global_assignment -name SYSTEMVERILOG_FILE fpga/ctw_psram_mode_model.sv
+set_global_assignment -name SYSTEMVERILOG_FILE fpga/ctw_memory_models.sv
+set_location_assignment PIN_AF4 -to ESP_RST_N
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ESP_RST_N
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to ESP_RST_N
+set_location_assignment PIN_V12 -to JP1_QSPI[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to JP1_QSPI[0]
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to JP1_QSPI[0]
+set_location_assignment PIN_E8 -to JP1_QSPI[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to JP1_QSPI[1]
+set_location_assignment PIN_W12 -to JP1_QSPI[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to JP1_QSPI[2]
+set_location_assignment PIN_D11 -to JP1_QSPI[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to JP1_QSPI[3]
+set_location_assignment PIN_D8 -to JP1_QSPI[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to JP1_QSPI[4]
+set_location_assignment PIN_AH13 -to JP1_QSPI[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to JP1_QSPI[5]
+set_location_assignment PIN_AF7 -to RAM_A_CS_N
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to RAM_A_CS_N
+set_location_assignment PIN_AH14 -to RAM_B_CS_N
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to RAM_B_CS_N
+set_global_assignment -name VERILOG_FILE src/ctw_qspi_boot.v
+set_global_assignment -name VERILOG_FILE src/ctw_mcu_pads.v
+set_location_assignment PIN_AD5 -to SENSOR_D[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SENSOR_D[0]
+set_location_assignment PIN_AG14 -to SENSOR_D[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SENSOR_D[1]
+set_location_assignment PIN_AE23 -to SENSOR_D[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SENSOR_D[2]
+set_location_assignment PIN_AD23 -to SENSOR_RX
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SENSOR_RX
+set_location_assignment PIN_AE24 -to SENSOR_TX
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SENSOR_TX
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to SENSOR_RX
+# V7 configurable bidirectional GPIO; actual header JP1 pins 19, 20.
+set_location_assignment PIN_D12 -to JP1_BIDIR[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to JP1_BIDIR[0]
+set_location_assignment PIN_AD20 -to JP1_BIDIR[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to JP1_BIDIR[1]
+
+# V9 diagnostic PWM outputs to physical GPIO0 JP1 pins 21 and 22.
+set_location_assignment PIN_C12 -to PWM_TEST0
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PWM_TEST0
+set_location_assignment PIN_AD17 -to PWM_TEST1
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PWM_TEST1
+# Simulation-friendly weak pullups for open-drain I2C; real ASIC needs 4.7k resistors.
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to JP1_BIDIR[0]
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to JP1_BIDIR[1]
+# New synthesis sources
+set_global_assignment -name VERILOG_FILE src/ctw_pwm.v
+set_global_assignment -name VERILOG_FILE src/ctw_i2c_master.v
+
+# V10 system watchdog
+set_global_assignment -name VERILOG_FILE src/ctw_sys_watchdog.v

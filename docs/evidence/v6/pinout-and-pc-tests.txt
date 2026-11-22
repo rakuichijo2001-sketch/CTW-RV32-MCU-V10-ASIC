@@ -1,0 +1,17 @@
+mkdir -p build
+/workspace/scratch/4903816140fc/.sensor-private/eda/usr/bin/iverilog -B /workspace/scratch/4903816140fc/.sensor-private/eda/usr/lib/x86_64-linux-gnu/ivl -g2012 -s tb_pinout_v6 -o build/tb-pinout src/alu.v src/core.v src/counter.v src/cpu.v src/ctw_mcu.v src/ctw_mcu_pads.v src/ctw_qspi_boot.v src/ctw_uart.v src/decode.v src/hasemi_mem_ctrl_stream.v src/hasemi_tinyqv_pio.v src/qspi_ctrl.v src/register.v src/tt_um_ctw_rv32_mcu.v test/tb_pinout_v6.sv
+/workspace/scratch/4903816140fc/.sensor-private/eda/usr/bin/vvp build/tb-pinout
+PASS V6 pin remap: GPIO0=u0, PSRAM A=u5, B=u6, UART=u7, uio7:6 high-Z
+test/tb_pinout_v6.sv:44: $finish called at 1500000 (1ps)
+python3 -m unittest discover -s test -p test_sensor_tool.py
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.000s
+
+OK
+python3 -m unittest discover -s test -p test_uploader.py
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK

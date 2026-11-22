@@ -1,0 +1,21 @@
+PASS bank 0 watchdog at 50 MHz: deselect safely and latch failure until reset
+PASS bank 1 watchdog at 50 MHz: deselect safely and latch failure until reset
+PASS bank 0 watchdog at 10 MHz: deselect safely and latch failure until reset
+PASS bank 1 watchdog at 10 MHz: deselect safely and latch failure until reset
+PASS image A: JEDEC, WREN/WIP, erase, NOR 1-to-0 writes and full 808-byte SPI readback
+PASS image A: automatic warm-memory init and LED=a4 after upload and KEY0 reset
+PASS image B: JEDEC, WREN/WIP, erase, NOR 1-to-0 writes and full 808-byte SPI readback
+PASS image B: automatic warm-memory init and LED=58 after upload and KEY0 reset
+PASS cold-memory reboot from retained Flash image without a programmer
+PASS V4 model=0 asic=1, max PSRAM CS-low 4400 ns
+PASS image A: JEDEC, WREN/WIP, erase, NOR 1-to-0 writes and full 808-byte SPI readback
+PASS image A: automatic warm-memory init and LED=a4 after upload and KEY0 reset
+PASS image B: JEDEC, WREN/WIP, erase, NOR 1-to-0 writes and full 808-byte SPI readback
+PASS image B: automatic warm-memory init and LED=58 after upload and KEY0 reset
+PASS V4 model=1 asic=0, max PSRAM CS-low 3400 ns
+PASS image A: JEDEC, WREN/WIP, erase, NOR 1-to-0 writes and full 808-byte SPI readback
+PASS image A: automatic warm-memory init and LED=a4 after upload and KEY0 reset
+PASS image B: JEDEC, WREN/WIP, erase, NOR 1-to-0 writes and full 808-byte SPI readback
+PASS image B: automatic warm-memory init and LED=58 after upload and KEY0 reset
+PASS cold-memory reboot from retained Flash image without a programmer
+PASS V4 model=0 asic=0, max PSRAM CS-low 3400 ns

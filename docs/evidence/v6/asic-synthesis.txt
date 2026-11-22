@@ -1,0 +1,20 @@
+       19   $_SDFFE_PP0P_
+        7   $_SDFFE_PP1P_
+       72   $_SDFF_PN0_
+        4   $_SDFF_PN1_
+        3   $_SDFF_PP0_
+      119   $_XNOR_
+      254   $_XOR_
+       16   $scopeinfo
+
+19. Executing Verilog backend.
+
+19.1. Executing BMUXMAP pass.
+
+19.2. Executing DEMUXMAP pass.
+Dumping module `\tt_um_ctw_rv32_mcu'.
+
+Warnings: 1 unique messages, 2 total
+End of script. Logfile hash: 93c959e82e, time: 6.07s, user: 6.08s, system: 0.00s
+Yosys 0.71 (git sha1 b4c586fd3, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+Time spent: 55% 1x abc (3 sec), 11% 65x opt_expr (0 sec), ...

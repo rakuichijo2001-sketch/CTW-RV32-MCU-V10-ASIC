@@ -1,0 +1,2 @@
+PASS V4 gate: cold and warm boot, dual PSRAM, async reset and ena, max PSRAM CS-low 4400 ns
+test/tb_v3.sv:264: $finish called at 13672303000 (1ps)

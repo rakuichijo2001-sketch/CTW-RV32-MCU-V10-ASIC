@@ -1,0 +1,16 @@
+test -s test/smoke_timing.hex
+mkdir -p build
+set -e; for delay in 0 10 30; do \
+  /workspace/scratch/4903816140fc/.sensor-private/eda/usr/bin/iverilog -B /workspace/scratch/4903816140fc/.sensor-private/eda/usr/lib/x86_64-linux-gnu/ivl -g2012 -DASIC -DGATE_SMOKE -DDATASHEET_TIMING -Ptb_v3.TEST_PAD_NS=$delay -s tb_v3 \
+    -o build/timed-$delay src/alu.v src/core.v src/counter.v src/cpu.v src/ctw_mcu.v src/ctw_mcu_pads.v src/ctw_qspi_boot.v src/ctw_uart.v src/decode.v src/hasemi_mem_ctrl_stream.v src/hasemi_tinyqv_pio.v src/qspi_ctrl.v src/register.v src/tt_um_ctw_rv32_mcu.v fpga/ctw_flash_model.sv fpga/ctw_memory_models.sv fpga/ctw_psram_mode_model.sv fpga/ctw_psram_qpi_model.sv test/reference/timed_memory_fixture.sv test/reference/psram_pin_reference.sv test/tb_v3.sv; \
+  /workspace/scratch/4903816140fc/.sensor-private/eda/usr/bin/vvp build/timed-$delay; \
+done
+PASS pin timing with 0 ns transport in each direction
+PASS V4 gate: cold and warm boot, dual PSRAM, async reset and ena, max PSRAM CS-low 4400 ns
+test/tb_v3.sv:342: $finish called at 90005203000 (1ps)
+PASS pin timing with 10 ns transport in each direction
+PASS V6 gate: cold and warm boot, dual PSRAM, async reset and ena, max PSRAM CS-low 4400 ns
+test/tb_v3.sv:346: $finish called at 15568303000 (1ps)
+PASS pin timing with 30 ns transport in each direction
+PASS V6 gate: cold and warm boot, dual PSRAM, async reset and ena, max PSRAM CS-low 4400 ns
+test/tb_v3.sv:346: $finish called at 15568303000 (1ps)

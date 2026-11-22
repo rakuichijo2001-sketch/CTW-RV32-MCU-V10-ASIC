@@ -1,0 +1,21 @@
+Gate,Status,Evidence,Notes
+RTL freeze / SHA-256,PASS,asic/rtl_freeze_manifest.json; asic/reports/preflight.txt,Static snapshot only
+FPGA regression V10,PASS,user provided COM12 logs 2026-11-22,ASIC not yet verified
+ISA torture 10000 + strict gp/tp,PASS,user provided COM12 logs 2026-11-22,"Directed, not certified compliance"
+FPGA soak 2h final RTL,PASS,"user 142294 packets, 2276720 rounds",GPR fix baseline
+FPGA reset 100 cycles,PASS,user provided 100/100,External reset only
+Yosys frontend / RTL lint,PENDING,,Install ASIC toolchain or run CI
+Technology mapped Sky130 synthesis,PENDING,,No area metrics yet
+4x2 tile floorplan fit,PENDING,,Target only
+Placement/CTS/Routing complete,PENDING,,
+STA setup at 20MHz across PVT,PENDING,,
+STA hold across PVT,PENDING,,
+Clock/reset/CDC/RDC review,PENDING,,
+Routing congestion / antenna / IR drop,PENDING,,
+DRC / LVS / physical checks,PENDING,,Do not infer from config switches
+Tiny Tapeout precheck,PENDING,,
+Post-synthesis gate-level simulation,PENDING,,
+Post-layout gate-level simulation,PENDING,,
+External Flash & 2xPSRAM actual IC timing,PENDING,,Hardware models not yet real
+ASIC IO voltage/board/pullups,PENDING,,Review IO spec and voltage compatibility
+Final submission/tapeout approval,PENDING,,Do not submit before signoff

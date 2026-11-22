@@ -1,0 +1,11 @@
+build/
+db/
+incremental_db/
+output_files/
+*.qws
+test/gate_level_netlist.v
+test/output/
+test/tt-gl.vvp
+test/results.xml
+
+__pycache__/

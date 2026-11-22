@@ -1,0 +1,11 @@
+V10 SHA256 manifest, current source snapshot
+
+firmware/v10_qualification.bin 2136 bytes SHA256 8c7e7af87145e2bd5d90b3a896dd5e479bf8fcd3e64e62466a1d88dc9fe888aa
+firmware/v10_exceptions.bin 220 bytes SHA256 8509065141ecce1e431f22554cd11579ad78f69181f2e00387bd227780135d9d
+firmware/v10_peripheral_edge.bin 532 bytes SHA256 5492de12c7909269d3ea81f32b3f6937c526ac7c1368061a141854cb50396565
+firmware/v9_peripherals.bin 428 bytes SHA256 6822aea9f9ad29b67a6d78a1edf1fce0e6239120302f656dee6407eca80fb880
+
+Quartus QPF count: 1; QSF/source references checked; Tiny Tapeout info.yaml references checked.
+Arduino syntax verified with host mocks, not real ESP-IDF build.
+Icarus, Verilator, Quartus and PDK signoff not installed / not run.
+V10 board test and multi-hour soak pending on user DE10 + ESP32.

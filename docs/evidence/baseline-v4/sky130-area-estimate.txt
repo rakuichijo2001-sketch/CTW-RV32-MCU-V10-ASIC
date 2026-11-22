@@ -1,0 +1,13 @@
+       13  292.781   sky130_fd_sc_hd__xnor3_1
+       80  700.672   sky130_fd_sc_hd__xor2_1
+        5  118.864   sky130_fd_sc_hd__xor3_1
+
+   Area for cell type $scopeinfo is unknown!
+
+   Chip area for module '\tt_um_ctw_rv32_mcu': 47449.257600
+     of which used for sequential elements: 25664.614400 (54.09%)
+
+Warnings: 1 unique messages, 2 total
+End of script. Logfile hash: 93c986d866, time: 4.57s, user: 4.57s, system: 0.00s
+Yosys 0.71 (git sha1 b4c586fd3, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+Time spent: 38% 1x abc (1 sec), 13% 62x opt_expr (0 sec), ...

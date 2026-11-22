@@ -1,0 +1,6 @@
+PASS pin timing with 0 ns transport in each direction
+PASS V4 gate: cold and warm boot, dual PSRAM, async reset and ena, max PSRAM CS-low 4400 ns
+PASS pin timing with 10 ns transport in each direction
+PASS V4 gate: cold and warm boot, dual PSRAM, async reset and ena, max PSRAM CS-low 4400 ns
+PASS pin timing with 30 ns transport in each direction
+PASS V4 gate: cold and warm boot, dual PSRAM, async reset and ena, max PSRAM CS-low 4400 ns
