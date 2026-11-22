@@ -33,12 +33,14 @@ module ctw_mcu #(parameter integer UART_DIV = 174) (
     assign enabled = ext_rst_n && run_n;
 
     wire [27:0] addr;
+    // A single high-page decode feeds all the local MMIO offsets.
+    wire mmio_page = (addr[27:8] == 20'h80000);
     wire [1:0] wr_n, rd_n;
     wire [31:0] wdata;
     reg [31:0] rdata;
     wire rd = rd_n != 2'b11;
     wire wr = wr_n != 2'b11;
-    wire data_sel = addr == 28'h800000c;
+    wire data_sel = mmio_page && (addr[7:0] == 8'h0c);
     wire tx_busy, rx_valid;
     wire [7:0] rx_data;
     wire ready = (rd || wr) && !(wr && data_sel && tx_busy);
@@ -57,7 +59,7 @@ module ctw_mcu #(parameter integer UART_DIV = 174) (
     reg [15:0] i2c_div;
     wire [7:0] i2c_rx;
     wire i2c_busy, i2c_done, i2c_nack, i2c_timeout;
-    wire i2c_go = enabled && ready && wr && (addr==28'h8000050) && wdata[0] && !i2c_busy;
+    wire i2c_go = enabled && ready && wr && (mmio_page && addr[7:0]==8'h50) && wdata[0] && !i2c_busy;
     ctw_pwm pwm_i(
         .clk(clk), .rst_n(run_n), .enable(pwm_enable),
         .divider(pwm_div), .duty0(pwm_duty0), .duty1(pwm_duty1),
@@ -82,7 +84,7 @@ module ctw_mcu #(parameter integer UART_DIV = 174) (
     reg [31:0] wdt_cfg;
     assign wdt_enable = wdt_cfg[0] && wdt_cfg[31:16] >= 16'd10;
     assign wdt_timeout_ms = wdt_cfg[31:16];
-    assign wdt_kick = enabled && ready && wr && addr==28'h800006c &&
+    assign wdt_kick = enabled && ready && wr && mmio_page && addr[7:0]==8'h6c &&
                       wdata==32'ha55a5aa5;
     reg [31:0] timer_cycles;
     // IRQ16: edge GPIO (ui[6:0], then input-mode uio[7:6]);
@@ -132,67 +134,70 @@ module ctw_mcu #(parameter integer UART_DIV = 174) (
             timer_cycles <= timer_cycles + 1'b1;
             gpio_prev <= gpio_irq_value;
             if (timer_event) timer_armed <= 0;
-            if (ready && wr) begin
-                case (addr)
-                    28'h8000024: gpio_rise_mask <= wdata[8:0];
-                    28'h8000028: gpio_fall_mask <= wdata[8:0];
-                    28'h800002c: timer_compare <= wdata;
-                    28'h8000030: timer_armed <= wdata[0];
-                    28'h8000034: pinmux_reg <= wdata[2:0];
-                    28'h8000038: pwm_enable <= wdata[0];
-                    28'h800003c: pwm_div <= wdata[15:0];
-                    28'h8000040: pwm_duty0 <= wdata[7:0];
-                    28'h8000044: pwm_duty1 <= wdata[7:0];
-                    28'h8000054: i2c_addr <= wdata[6:0];
-                    28'h8000058: i2c_tx <= wdata[7:0];
-                    28'h8000064: i2c_div <= wdata[15:0];
-                    28'h8000068: wdt_cfg <= wdata;
+            if (ready && wr && mmio_page) begin
+                case (addr[7:0])
+                    8'h24: gpio_rise_mask <= wdata[8:0];
+                    8'h28: gpio_fall_mask <= wdata[8:0];
+                    8'h2c: timer_compare <= wdata;
+                    8'h30: timer_armed <= wdata[0];
+                    8'h34: pinmux_reg <= wdata[2:0];
+                    8'h38: pwm_enable <= wdata[0];
+                    8'h3c: pwm_div <= wdata[15:0];
+                    8'h40: pwm_duty0 <= wdata[7:0];
+                    8'h44: pwm_duty1 <= wdata[7:0];
+                    8'h54: i2c_addr <= wdata[6:0];
+                    8'h58: i2c_tx <= wdata[7:0];
+                    8'h64: i2c_div <= wdata[15:0];
+                    8'h68: wdt_cfg <= wdata;
                     default: ;
                 endcase
             end
-            if (wr && addr == 28'h8000004)
+            if (wr && mmio_page && addr[7:0] == 8'h04)
                 gpio_out <= wdata[7:0];
             // Additional bidirectional GPIO pads uio[7:6].
             // DIR: 0=input (high-Z), 1=output.
-            if (wr && addr == 28'h8000018)
+            if (wr && mmio_page && addr[7:0] == 8'h18)
                 gpio_bidir_dir <= wdata[1:0];
-            if (wr && addr == 28'h800001c)
+            if (wr && mmio_page && addr[7:0] == 8'h1c)
                 gpio_bidir_out <= wdata[1:0];
         end
     end
 
     always @* begin
-        case (addr)
-            28'h8000000: rdata = {24'd0,gpio_sync};
-            28'h8000004: rdata = {24'd0,gpio_out};
-            28'h8000008: rdata = timer_cycles;
-            28'h800000c: rdata = {24'd0,rx_data};
-            28'h8000010: rdata = {30'd0,rx_valid,tx_busy};
-            28'h8000014: rdata = 32'h43545731;
-            28'h8000018: rdata = {30'd0,gpio_bidir_dir};
-            28'h800001c: rdata = {30'd0,gpio_bidir_out};
-            28'h8000020: rdata = {30'd0,bidir_sync};
-            28'h8000024: rdata = {23'd0,gpio_rise_mask};
-            28'h8000028: rdata = {23'd0,gpio_fall_mask};
-            28'h800002c: rdata = timer_compare;
-            28'h8000030: rdata = {31'd0,timer_armed};
-            28'h8000034: rdata = {29'd0,pinmux_reg};
-            28'h8000038: rdata = {31'd0,pwm_enable};
-            28'h800003c: rdata = {16'd0,pwm_div};
-            28'h8000040: rdata = {24'd0,pwm_duty0};
-            28'h8000044: rdata = {24'd0,pwm_duty1};
-            28'h8000050: rdata = {31'd0,i2c_busy};
-            28'h8000054: rdata = {25'd0,i2c_addr};
-            28'h8000058: rdata = {24'd0,i2c_tx};
-            28'h800005c: rdata = {24'd0,i2c_rx};
-            28'h8000060: rdata = {28'd0,i2c_timeout,i2c_nack,i2c_done,i2c_busy};
-            28'h8000064: rdata = {16'd0,i2c_div};
-            28'h8000068: rdata = wdt_cfg;
-            28'h800006c: rdata = 32'b0;
-            28'h8000070: rdata = {16'b0,wdt_event_count,7'b0,wdt_last_reset};
-            28'h8000074: rdata = {16'b0,wdt_elapsed_ms};
-            default: rdata = 0;
-        endcase
+        rdata = 32'b0;
+        if (mmio_page) begin
+            case (addr[7:0])
+            8'h00: rdata = {24'd0,gpio_sync};
+            8'h04: rdata = {24'd0,gpio_out};
+            8'h08: rdata = timer_cycles;
+            8'h0c: rdata = {24'd0,rx_data};
+            8'h10: rdata = {30'd0,rx_valid,tx_busy};
+            8'h14: rdata = 32'h43545731;
+            8'h18: rdata = {30'd0,gpio_bidir_dir};
+            8'h1c: rdata = {30'd0,gpio_bidir_out};
+            8'h20: rdata = {30'd0,bidir_sync};
+            8'h24: rdata = {23'd0,gpio_rise_mask};
+            8'h28: rdata = {23'd0,gpio_fall_mask};
+            8'h2c: rdata = timer_compare;
+            8'h30: rdata = {31'd0,timer_armed};
+            8'h34: rdata = {29'd0,pinmux_reg};
+            8'h38: rdata = {31'd0,pwm_enable};
+            8'h3c: rdata = {16'd0,pwm_div};
+            8'h40: rdata = {24'd0,pwm_duty0};
+            8'h44: rdata = {24'd0,pwm_duty1};
+            8'h50: rdata = {31'd0,i2c_busy};
+            8'h54: rdata = {25'd0,i2c_addr};
+            8'h58: rdata = {24'd0,i2c_tx};
+            8'h5c: rdata = {24'd0,i2c_rx};
+            8'h60: rdata = {28'd0,i2c_timeout,i2c_nack,i2c_done,i2c_busy};
+            8'h64: rdata = {16'd0,i2c_div};
+            8'h68: rdata = wdt_cfg;
+            8'h6c: rdata = 32'b0;
+            8'h70: rdata = {16'b0,wdt_event_count,7'b0,wdt_last_reset};
+            8'h74: rdata = {16'b0,wdt_elapsed_ms};
+                default: rdata = 0;
+            endcase
+        end
     end
 
     ctw_uart #(.DIV(UART_DIV)) uart_i (

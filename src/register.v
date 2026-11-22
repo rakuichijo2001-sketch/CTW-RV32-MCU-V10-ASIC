@@ -21,12 +21,17 @@ module tinyqv_registers #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
     output [23:1] return_addr
 );
 
+    localparam integer READ_BANKS = 1 << REG_ADDR_BITS;
     reg [31:0] registers [1:NUM_REGS-1];
-    wire [3:0] reg_access [0:2**REG_ADDR_BITS-1];
+    wire [3:0] reg_access [0:READ_BANKS-1];
+    // Shared one-hot address decoders for both register read ports.
+    wire [READ_BANKS-1:0] rs1_select, rs2_select;
 
     genvar i;
     generate
-        for (i = 0; i < 2**REG_ADDR_BITS; i = i + 1) begin : gen_reg_bank
+        for (i = 0; i < READ_BANKS; i = i + 1) begin : gen_reg_bank
+            assign rs1_select[i] = (rs1 == i);
+            assign rs2_select[i] = (rs2 == i);
             if (i == 0 || i >= NUM_REGS) begin : gen_reg_zero
                 assign reg_access[i] = 0;
             end else begin : gen_reg_normal
@@ -56,8 +61,20 @@ module tinyqv_registers #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
         end
     endgenerate
 
-    assign data_rs1 = reg_access[rs1];
-    assign data_rs2 = reg_access[rs2];
+    // One-hot gated 4-bit reads: reduction OR builds balanced logic
+    // instead of wide binary mux trees; x0 and invalid addresses read zero.
+    genvar bit_idx, bank_idx;
+    generate
+        for (bit_idx = 0; bit_idx < 4; bit_idx = bit_idx + 1) begin : gen_read_mux
+            wire [READ_BANKS-1:0] rs1_terms, rs2_terms;
+            for (bank_idx = 0; bank_idx < READ_BANKS; bank_idx = bank_idx + 1) begin : gen_read_bit
+                assign rs1_terms[bank_idx] = rs1_select[bank_idx] & reg_access[bank_idx][bit_idx];
+                assign rs2_terms[bank_idx] = rs2_select[bank_idx] & reg_access[bank_idx][bit_idx];
+            end
+            assign data_rs1[bit_idx] = |rs1_terms;
+            assign data_rs2[bit_idx] = |rs2_terms;
+        end
+    endgenerate
     assign return_addr = registers[1][31:9];
 
     // The serial register file has no architectural reset requirement.
