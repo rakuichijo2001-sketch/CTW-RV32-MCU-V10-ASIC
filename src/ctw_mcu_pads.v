@@ -3,8 +3,8 @@
 // Shared between the FPGA and the Tiny Tapeout wrapper. Raw reset overrides
 // output enables without a clock. A synchronized release starts the boot FSM.
 module ctw_mcu_pads #(
-    parameter integer CLK_HZ=20000000,
-    parameter integer UART_DIV=174,
+    parameter integer CLK_HZ=10000000,
+    parameter integer UART_DIV=87,
     parameter integer POWERUP_US=6000,
     parameter [2:0] QSPI_READ_DELAY_CFG=3'b000
 )(
