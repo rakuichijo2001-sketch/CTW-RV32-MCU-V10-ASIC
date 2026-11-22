@@ -1,5 +1,5 @@
 """Unit sanity checks; never claim these replace actual board or RTL testing."""
-import csv, pathlib, unittest, zlib
+import csv, json, pathlib, re, unittest, zlib
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 MASK=0xffffffff
 class TestISAArtifact(unittest.TestCase):
@@ -17,9 +17,21 @@ class TestISAArtifact(unittest.TestCase):
             self.assertLessEqual(len(b),4096)
             self.assertNotEqual(zlib.crc32(b),0)
     def test_clock_metadata(self):
-        self.assertIn('clock_hz: 20000000',(ROOT/'info.yaml').read_text())
-        self.assertIn('"CLOCK_PERIOD": 50,',(ROOT/'src/config.json').read_text())
-        self.assertIn('CLK_HZ=20000000',(ROOT/'src/tt_um_ctw_rv32_mcu.v').read_text())
+        # Compare source metadata/RTL with the configured ASIC clock.
+        info=(ROOT/'info.yaml').read_text()
+        config=json.loads((ROOT/'src/config.json').read_text())
+        top=(ROOT/'src/tt_um_ctw_rv32_mcu.v').read_text()
+        pads=(ROOT/'src/ctw_mcu_pads.v').read_text()
+        hz=int(re.search(r'\bclock_hz:\s*(\d+)',info).group(1))
+        top_hz=int(re.search(r'\bCLK_HZ=(\d+)',top).group(1))
+        pad_hz=int(re.search(r'\bCLK_HZ=(\d+)',pads).group(1))
+        top_div=int(re.search(r'\bUART_DIV=(\d+)',top).group(1))
+        pad_div=int(re.search(r'\bUART_DIV=(\d+)',pads).group(1))
+        self.assertEqual(hz*config['CLOCK_PERIOD'],1_000_000_000)
+        self.assertEqual((top_hz,pad_hz),(hz,hz))
+        self.assertEqual(top_div,pad_div)
+        self.assertLess(abs(hz/top_div-115200)/115200,0.02)
+        # FPGA remains independently configured at 50 MHz.
         self.assertIn('CLK_HZ(50000000)',(ROOT/'ctw_de10_top.sv').read_text())
     def test_gp_tp_implemented_as_writable_gprs(self):
         s=(ROOT/'src/register.v').read_text()
