@@ -431,5 +431,23 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
         $finish;
     end
 `endif
+`ifdef ASIC
+`ifdef IRQ_SMOKE
+`ifdef DATASHEET_TIMING
+    // Diagnostic only: observe where the timed ASIC IRQ simulation stalls.
+    // This block does not drive or override any DUT signals.
+    initial begin : irq_asic_timing_trace
+        for (integer trace_step=1; trace_step<=11; trace_step=trace_step+1) begin
+            #10000000;  // 10 ms
+            $display("IRQ_ASIC_TIMING_TRACE ms=%0d boot_ready=%b boot_failed=%b boot_step=%0d boot_phase=%0d ram_timeout=%b cpu_active=%b gpio=%02h uart_tx=%b fcs=%b acs=%b bcs=%b flash_xip=%b ram_qpi=%b%b",
+                trace_step*10, dut.soc.boot_ready, dut.soc.boot_failed,
+                dut.soc.boot_i.step, dut.soc.boot_i.phase, dut.soc.ram_timeout,
+                dut.soc.cpu_active, dut.soc.gpio_debug, sensor_tx,
+                fcs, acs, bcs, xip, qpi_a, qpi_b);
+        end
+    end
+`endif
+`endif
+`endif
     initial begin #120000000;$fatal(1,"Timeout LED=%02x",led); end
 endmodule
