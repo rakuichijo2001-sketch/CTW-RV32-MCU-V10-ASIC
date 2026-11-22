@@ -1,11 +1,11 @@
 {
-  "release_name": "CTW-RV32-MCU-V10-PPA-3X2-25MHZ-CANDIDATE",
+  "release_name": "CTW-RV32-MCU-V10-3X2-25MHZ-AREA3-EXPERIMENT",
   "prepared_utc": "2026-11-22",
   "project": "CTW-RV32-MCU-V10-ASIC-STAGE1",
   "claimed_asic_verified": false,
   "sha256": {
     "info.yaml": "362babee8c2cb912a8b2294f0542198e24c87136b61a21e8077141bfa4d8d05a",
-    "src/config.json": "318d46dec0054b7f8b4c2c9ccf4d62fcaf116f68bdd3c392169c575ea0eab3ec",
+    "src/config.json": "cdd1075290ede5c3df6cea06ced531ddddbd044aaf66e3dfb351d79cead39047",
     ".github/workflows/gds.yaml": "7c90c5363e9f4770e1e6dd266844cdf918b0ef679dbf359d8e278b8c66dabff6",
     "src/alu.v": "66165eddc0cbed614ec972cd2d8e7555a47476da08c8bc81d64450cdd66f1483",
     "src/core.v": "24d4ba3cc0e4f4915d9ba5012e6ee6a54b6159e08c5a1603c66ea256f8d54851",
@@ -23,6 +23,6 @@
     "src/hasemi_tinyqv_pio.v": "25838f37a81f6394893f3baedd57db1b916a5441dade7aeba2ffb1ce36a69729",
     "src/qspi_ctrl.v": "2a6e5264f92f9d411d92c93e57f3de46b2b23d64482c3f1cdedf3af757c0a406",
     "src/register.v": "b3d7dab0ecbb43870fb79489ab0bad1d1532d376f6d284e3297ddc65041ad80e",
-    "src/tt_um_ctw_rv32_mcu.v": "e680367f64240151731cd7bd57ed657601d8331491a527d7c9be004e00915ae2"
+    "src/tt_um_ctw_rv32_mcu.v": "b8ef41cbf14b6ad3d32c0f0dc516868b03fdbb0f965a52b3267e2a4c3485c0ac"
   }
 }
