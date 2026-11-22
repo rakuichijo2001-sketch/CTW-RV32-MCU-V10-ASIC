@@ -1,15 +1,15 @@
 {
-  "release_name": "CTW-RV32-MCU-V10-EXPERIMENT-3X2-10MHZ-DELAYCELL-REMOVAL",
+  "release_name": "CTW-RV32-MCU-V10-EXPERIMENT-3X2-10MHZ-HOLD-DELAY-RESTORED",
   "prepared_utc": "2026-11-22",
   "project": "CTW-RV32-MCU-V10-ASIC-STAGE1",
   "claimed_asic_verified": false,
   "sha256": {
     "info.yaml": "d399030541c12dc986f6d02ee58348efbe218084a12e2d9d36f148cfcc5e4d88",
     "src/config.json": "eb994b554fa56dd498d21d15d1e947ea0f8080ac40d72dc013995c15ac4d4d57",
-    ".github/workflows/gds.yaml": "7c90c5363e9f4770e1e6dd266844cdf918b0ef679dbf359d8e278b8c66dabff6",
+    ".github/workflows/gds.yaml": "9c881c79ac330b636726c3d67fe36e2ca8841001b382a3133b2b0994ecad34b1",
     "src/alu.v": "66165eddc0cbed614ec972cd2d8e7555a47476da08c8bc81d64450cdd66f1483",
     "src/core.v": "24d4ba3cc0e4f4915d9ba5012e6ee6a54b6159e08c5a1603c66ea256f8d54851",
-    "src/counter.v": "a43a4e65e037097e2efd7a87d1978aeb45ad38a9995adae3aa97ce1a1d2572ff",
+    "src/counter.v": "f5ef1c7a63ac1686851bbc9502fdd1d37879f2fa37907a44a2b8469d47efb934",
     "src/cpu.v": "18a09b6ebfc4d97e89478bee4f6a81b212787bee21a028eca6f6959f0072f863",
     "src/ctw_mcu.v": "cf05017bd58ed0e76a46c517eaea00ea90d4977d7cb08d9cc7dd30bb8e248bc3",
     "src/ctw_mcu_pads.v": "eb0694a5826819db415cfa9754874dfda009c909628dd5227e75f9fa6961cec5",
@@ -22,7 +22,7 @@
     "src/hasemi_mem_ctrl_stream.v": "e27dda0be3bca7a5f3be6a1d9158991c2c650e1ca7a19bf139a829dc3e767224",
     "src/hasemi_tinyqv_pio.v": "25838f37a81f6394893f3baedd57db1b916a5441dade7aeba2ffb1ce36a69729",
     "src/qspi_ctrl.v": "2a6e5264f92f9d411d92c93e57f3de46b2b23d64482c3f1cdedf3af757c0a406",
-    "src/register.v": "47c51ad9e08979001f7259cc829595b01d73ddb4ba6fd547a9a00ca28e6b71b9",
+    "src/register.v": "1c49943c825d47f13dd75071146214f1580efe86e1690c368af29ef5632263e6",
     "src/tt_um_ctw_rv32_mcu.v": "36a2304ac40eb3eb3489b51830001dc0003e253ed8793fc7aa22131c9c9f3482"
   }
 }
