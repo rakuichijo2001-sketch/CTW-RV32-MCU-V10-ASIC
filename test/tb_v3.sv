@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module tb_v3 #(parameter integer TEST_PAD_NS=30);
+module tb_v3 #(parameter integer TEST_PAD_NS=30, parameter [2:0] QSPI_CFG=3'b001);
 `ifdef ASIC
     // Match 30 MHz ASIC clock (33.333... ns) configured in info.yaml/src/config.json.
     localparam real CLK_NS=1000.0/30.0;
@@ -39,7 +39,7 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
     supply1 vpwr;
     supply0 vgnd;
 `endif
-    tt_um_ctw_rv32_mcu dut(
+    tt_um_ctw_rv32_mcu #(.QSPI_READ_DELAY_CFG(QSPI_CFG)) dut(
 `ifdef GL_TEST
         .VPWR(vpwr),.VGND(vgnd),
 `endif
@@ -279,6 +279,36 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
         end
     endtask
 `ifdef IRQ_SMOKE
+`ifdef FIRST_FETCH_CHECK
+    integer fetch_count = 0;
+    initial begin : first_fetch_check
+        wait(dut.soc.boot_ready === 1'b1);
+        $display("PHASE_SWEEP_BOOT cfg=%0d t=%0t xip=%b",QSPI_CFG,$time,xip);
+        forever begin
+            @(posedge dut.soc.mcu_i.cpu_i.instr_ready);
+            #1;
+            fetch_count=fetch_count+1;
+            $display("PHASE_SWEEP_FETCH cfg=%0d idx=%0d halfword=%h pc=%h woff=%d instr_valid=%b", QSPI_CFG, fetch_count,
+                dut.soc.mcu_i.cpu_i.instr_data,
+                dut.soc.mcu_i.cpu_i.cpu.pc,
+                dut.soc.mcu_i.cpu_i.cpu.instr_write_offset,
+                dut.soc.mcu_i.cpu_i.cpu.instr_valid);
+            if (fetch_count == 1 &&
+                dut.soc.mcu_i.cpu_i.instr_data !== 16'h006f)
+                $display("PHASE_SWEEP_FIRST_FETCH_MISMATCH cfg=%0d observed=%h expected=006f",
+                    QSPI_CFG,dut.soc.mcu_i.cpu_i.instr_data);
+            if (fetch_count >= 4) begin
+                $display("PHASE_SWEEP_FINISH cfg=%0d",QSPI_CFG);
+                $finish;
+            end
+        end
+    end
+    initial begin
+        #7500000;
+        $display("PHASE_SWEEP_TIMEOUT cfg=%0d fetched=%0d pc=%h", QSPI_CFG,fetch_count,dut.soc.mcu_i.cpu_i.cpu.pc);
+        $finish;
+    end
+`endif
     task expect_irq(input [7:0] expected);
         reg [7:0] observed;
         begin

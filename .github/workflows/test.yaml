@@ -1,9 +1,19 @@
-name: test
+name: qspi-phase-sweep-30mhz
 on: [push, workflow_dispatch]
 jobs:
-  model:
+  sweep:
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
-      - run: sudo apt-get update && sudo apt-get install -y iverilog yosys
-      - run: make test test-ram-guard test-timing test-sensor-asic test-sensor-pc test-pinout gate gate-irq test-v10-watchdog test-v9-rtl test-v10-python
+      - run: sudo apt-get update && sudo apt-get install -y iverilog
+      - name: Sweep read-delay configuration with timed Flash
+        shell: bash
+        run: |
+          set -e
+          mkdir -p build
+          for cfg in 0 1 2 3 4 5 6 7; do
+            echo "===== CFG $cfg ====="
+            iverilog -g2012 -DASIC -DIRQ_SMOKE -DDATASHEET_TIMING -DFIRST_FETCH_CHECK -Ptb_v3.QSPI_CFG=$cfg -s tb_v3 -o build/phase-$cfg src/*.v fpga/*.sv test/reference/timed_memory_fixture.sv test/reference/psram_pin_reference.sv test/tb_v3.sv
+            vvp build/phase-$cfg
+          done
