@@ -20,7 +20,8 @@
   "DESIGN_REPAIR_REMOVE_BUFFERS": true,
   "DESIGN_REPAIR_MAX_SLEW_PCT": 40,
   "DESIGN_REPAIR_MAX_CAP_PCT": 40,
-  "CTS_SINK_CLUSTERING_SIZE": 8,
+  "CTS_SINK_CLUSTERING_SIZE": 6,
+  "PNR_CORNERS": ["nom_tt_025C_1v80", "nom_ss_100C_1v60", "nom_ff_n40C_1v95"],
 
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
   "//": "The value is in nanoseconds, so 33.333ns ~= 30MHz.",
