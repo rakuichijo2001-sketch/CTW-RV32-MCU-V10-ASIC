@@ -16,7 +16,7 @@
   "PL_TARGET_DENSITY_PCT": 78,
 
   "//": "V30 PnR signal integrity experiment: avoid weak clkdlybuf4s25, rebalance buffers at 0.75ns actual slew limit",
-  "EXTRA_EXCLUDED_CELLS": ["sky130_fd_sc_hd__clkdlybuf4s25_1"],
+  "EXTRA_EXCLUDED_CELLS": ["sky130_fd_sc_hd__clkdlybuf4s25_1", "sky130_fd_sc_hd__clkdlybuf4s50_1"],
   "DESIGN_REPAIR_REMOVE_BUFFERS": true,
   "DESIGN_REPAIR_MAX_SLEW_PCT": 40,
   "DESIGN_REPAIR_MAX_CAP_PCT": 40,
