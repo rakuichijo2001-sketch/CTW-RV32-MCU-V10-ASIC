@@ -206,3 +206,9 @@ test-v10-gpr-rtl:
 	mkdir -p build
 	$(IVERILOG) -g2012 -s tb_v10_gp_tp_gpr -o build/v10-gpr src/register.v test/tb_v10_gp_tp_gpr.sv
 	$(VVP) build/v10-gpr
+
+.PHONY: test-v24-control
+test-v24-control:
+	mkdir -p build
+	$(IVERILOG) -g2012 -s tb_v24_predecode -o build/v24-control $(RTL) test/tb_v24_predecode.sv
+	$(VVP) build/v24-control
