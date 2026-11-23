@@ -119,7 +119,6 @@ module qspi_controller (
             spi_ram_a_select <= 1;
             spi_ram_b_select <= 1;
             data_req <= 0;
-            read_cycles_count <= 0;
         end else begin
             data_ready <= 0;
             data_req <= 0;
@@ -138,21 +137,14 @@ module qspi_controller (
                     spi_ram_b_select <= addr_in[24:23] != 2'b11;
                 end
             end else begin
-                if (read_cycles_count == 0)
-                    read_cycles_count <= 3'b001;
-                else
-                    read_cycles_count <= read_cycles_count - 3'b001;
-
                 if (fsm_state == FSM_STALLED) begin
                     spi_clk_out <= 0;
                     if (!stall_txn && read_cycles_count < 3'b010) begin
                         data_ready <= !is_writing;
                         if (is_writing) begin
                             fsm_state <= FSM_DATA;
-                            read_cycles_count <= 3'b000;
                         end else begin
                             fsm_state <= (delay_cycles_cfg[2:1] == 2'b00) ? FSM_DATA : FSM_STALL_RECOVER;
-                            read_cycles_count <= {1'b0, delay_cycles_cfg[2], delay_cycles_cfg[0]};
                         end
                     end
                 end else begin
@@ -168,7 +160,6 @@ module qspi_controller (
                                 nibbles_remaining <= 3'd1;
                                 if (stall_txn) begin
                                     fsm_state <= FSM_STALLED;
-                                    read_cycles_count <= delay_cycles_cfg | 3'b001;
                                 end else begin
                                     fsm_state <= FSM_DATA;
                                 end
@@ -201,7 +192,6 @@ module qspi_controller (
                                 end
                                 else if (fsm_state == FSM_DUMMY2) begin
                                     nibbles_remaining <= 3'd1;
-                                    read_cycles_count <= delay_cycles_cfg;
                                 end
                             end
                         end else begin
@@ -212,6 +202,40 @@ module qspi_controller (
                     end else begin
                         data_req <= is_writing && (fsm_state == FSM_DATA) && nibbles_remaining == 0;
                     end
+                end
+            end
+        end
+    end
+
+    // V26 Fmax experiment: read_cycles_count is not observable in IDLE.
+    // On stop_txn_now the FSM enters IDLE at the edge; its old delay count
+    // is discarded/reset when IDLE executes on the next edge, before any
+    // new transaction can use that delay. Do not let the late CPU branch/
+    // stop_txn path drive this counter's D/enable network.
+    // Preserve all active-state reload/decrement transitions exactly.
+    wire read_advance = (((fsm_state == FSM_DATA && !is_writing) ||
+                          fsm_state == FSM_STALL_RECOVER) ?
+                          (read_cycles_count == 0) : spi_clk_out);
+    wire phase_done = (nibbles_remaining == 0) ||
+                      (fsm_state == FSM_STALL_RECOVER && delay_cycles_cfg[2]);
+    always @(posedge clk) begin
+        if (!rstn || fsm_state == FSM_IDLE)
+            read_cycles_count <= 3'b000;
+        else begin
+            if (read_cycles_count == 0)
+                read_cycles_count <= 3'b001;
+            else
+                read_cycles_count <= read_cycles_count - 3'b001;
+
+            if (fsm_state == FSM_STALLED) begin
+                if (!stall_txn && read_cycles_count < 3'b010)
+                    read_cycles_count <= is_writing ? 3'b000 :
+                                         {1'b0, delay_cycles_cfg[2], delay_cycles_cfg[0]};
+            end else if (read_advance && phase_done) begin
+                if (fsm_state == FSM_DATA || fsm_state == FSM_STALL_RECOVER) begin
+                    if (stall_txn) read_cycles_count <= delay_cycles_cfg | 3'b001;
+                end else if (fsm_state == FSM_DUMMY2) begin
+                    read_cycles_count <= delay_cycles_cfg;
                 end
             end
         end
