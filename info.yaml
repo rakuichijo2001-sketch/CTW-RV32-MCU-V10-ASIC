@@ -4,7 +4,7 @@ project:
   discord: ""
   description: "TinyQV MCU with external Flash, dual PSRAM, UART, programmable bidirectional GPIO, GPIO/timer/UART interrupts, PWM, I2C master, pinmux, watchdog and stress-test firmware"
   language: "Verilog"
-  clock_hz: 50000000
+  clock_hz: 40000000
   tiles: "4x2"
   top_module: "tt_um_ctw_rv32_mcu"
   source_files:
