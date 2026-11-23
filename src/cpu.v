@@ -138,6 +138,36 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
     reg [4:2] counter_hi;
     wire [4:0] counter = {counter_hi, 2'b00};
 
+    // V21 Fmax experiment: register a one-hot nibble phase alongside the
+    // existing counter. The serial CPU's 32-to-4-bit operand multiplexers
+    // previously depended on the high-fanout binary counter, putting the
+    // counter -> operand mux -> ALU compare -> branch control path on STA.
+    // This ring is reset and advanced on the same edges as counter_hi.
+    // Keep the binary counter for arithmetic/state and use the one-hot phase
+    // only for critical operand selection. No extra pipeline cycle is added.
+    reg [7:0] nibble_phase_oh;
+    always @(posedge clk) begin
+        if (!rstn) nibble_phase_oh <= 8'b0000_0001;
+        else       nibble_phase_oh <= {nibble_phase_oh[6:0], nibble_phase_oh[7]};
+    end
+
+    function [3:0] select_nibble_oh;
+        input [31:0] word;
+        input [7:0] phase;
+        integer nib;
+        begin
+            select_nibble_oh = 4'b0000;
+            for (nib = 0; nib < 8; nib = nib + 1)
+                select_nibble_oh = select_nibble_oh |
+                    (word[nib*4 +: 4] & {4{phase[nib]}});
+        end
+    endfunction
+
+    wire [3:0] imm_nibble = select_nibble_oh(imm, nibble_phase_oh);
+    wire [3:0] pc_nibble = select_nibble_oh(pc, nibble_phase_oh);
+    wire [3:0] next_pc_nibble = select_nibble_oh(next_pc_for_core, nibble_phase_oh);
+    wire [3:0] data_in_nibble = select_nibble_oh(data_in, nibble_phase_oh);
+
     reg no_write_in_progress;
     reg load_started;
     wire stall_core = !instr_valid || ((is_store || is_load) && !no_write_in_progress);
@@ -302,7 +332,7 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
         clk,
         rstn,
         
-        imm[counter+:4],
+        imm_nibble,
         imm[11:0],
         csr_zimm,
 
@@ -327,9 +357,9 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
         rd,
 
         counter[4:2],
-        pc[counter+:4],
-        next_pc_for_core[counter+:4],
-        data_in[counter+:4],
+        pc_nibble,
+        next_pc_nibble,
+        data_in_nibble,
         data_ready_core,
 
         data_out_slice,
