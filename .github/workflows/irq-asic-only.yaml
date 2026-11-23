@@ -1,0 +1,11 @@
+name: irq-asic-timed-30mhz
+on: [push, workflow_dispatch]
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update && sudo apt-get install -y iverilog
+      - name: Verify complete IRQ firmware with timed Flash and PSRAM
+        run: make test-irq-asic
