@@ -111,8 +111,18 @@ module ctw_mcu_pads #(
     // FPGA defaults to no strap and retains its existing QSPI delay setting.
     // The CPU QSPI controller latches the phase while CPU reset is asserted;
     // after boot ui_in[1] resumes normal GPIO operation.
+    // Sample the strap during the externally released reset synchronizer
+    // window, then hold it across autonomous watchdog/CPU resets. GPIO1 may
+    // change freely during execution without changing the next QSPI boot.
+    reg qspi_short_pad_latched;
+    always @(posedge clk or negedge ext_rst_n) begin
+        if (!ext_rst_n)
+            qspi_short_pad_latched <= 1'b0;
+        else if (!reset_sync[2])
+            qspi_short_pad_latched <= ui_in[1];
+    end
     wire [2:0] qspi_read_delay_selected =
-        (QSPI_READ_STRAP_EN && ui_in[1]) ? 3'b001 : QSPI_READ_DELAY_CFG;
+        (QSPI_READ_STRAP_EN && qspi_short_pad_latched) ? 3'b001 : QSPI_READ_DELAY_CFG;
     ctw_mcu #(.UART_DIV(UART_DIV)) mcu_i (
         .clk(clk), .rst_n(boot_rst_n && boot_ready && !ram_timeout), .ena(ena),
         .gpio_in(ui_in), .gpio_out(gpio_out),

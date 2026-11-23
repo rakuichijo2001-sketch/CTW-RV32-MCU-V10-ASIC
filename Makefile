@@ -11,7 +11,7 @@ FLAGS := -march=rv32ec -mabi=ilp32e -mno-relax -msmall-data-limit=0 -Os -ffreest
 
 .PHONY: all test test-model test-external test-asic test-uploader test-esp32-host firmware fpga synth gate clean
 all: test
-test: test-model test-external test-asic test-uploader test-pinout test-gpio test-irq
+test: test-model test-external test-asic test-uploader test-pinout test-gpio test-irq test-qspi-strap
 
 test-model test-external test-asic:
 	test -s test/smoke_a.hex && test -s test/smoke_b.hex
@@ -213,3 +213,11 @@ test-irq-first-fetch:
 	mkdir -p build
 	$(IVERILOG) -g2012 -DASIC -DIRQ_SMOKE -DDATASHEET_TIMING -DFIRST_FETCH_CHECK -s tb_v3 -o build/irq-first-fetch $(RTL) $(MODELS) test/reference/timed_memory_fixture.sv test/reference/psram_pin_reference.sv test/tb_v3.sv
 	$(VVP) build/irq-first-fetch
+
+# V29: QSPI strap is captured once on external reset and retained during WDT reboots.
+.PHONY: test-qspi-strap
+test-qspi-strap:
+	mkdir -p build
+	$(IVERILOG) -g2012 -s tb_qspi_strap_v29 -o build/qspi-strap-v29 $(RTL) test/tb_qspi_strap_v29.sv
+	$(VVP) build/qspi-strap-v29
+
