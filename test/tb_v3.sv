@@ -279,6 +279,50 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
         end
     endtask
 `ifdef IRQ_SMOKE
+`ifdef ASIC
+    // Observability-only diagnostic for timed-memory IRQ startup.
+    // Samples at 6.5ms (after the 6ms boot POR), then every 0.25ms
+    // through 12ms, then every 10ms. This modifies neither DUT nor memory.
+    task automatic irq_trace;
+        begin
+            $display("TRACE_IRQ t=%0t boot=%b/%b ram_to=%b rst=%b pc=%h valid=%b count=%d instr_len_de=%d avail=%d woff=%d poff=%d fetch=%b restart=%b stall=%b instr_ready=%b instr_active=%b idx=%d qspi_stall=%b qspi_stop=%b qspi_fsm=%d qspi_count=%d qspi_ready=%b flash_cs=%b flash_xip=%b b0=%h b1=%h b2=%h b3=%h decode=%h", $time,
+                dut.soc.boot_ready,dut.soc.boot_failed,dut.soc.ram_timeout,
+                dut.soc.mcu_i.cpu_i.rstn,
+                dut.soc.mcu_i.cpu_i.cpu.pc,dut.soc.mcu_i.cpu_i.cpu.instr_valid,
+                dut.soc.mcu_i.cpu_i.cpu.counter_hi,
+                dut.soc.mcu_i.cpu_i.cpu.instr_len_de,dut.soc.mcu_i.cpu_i.cpu.instr_avail_len,
+                dut.soc.mcu_i.cpu_i.cpu.instr_write_offset,dut.soc.mcu_i.cpu_i.cpu.pc_offset,
+                dut.soc.mcu_i.cpu_i.cpu.instr_fetch_running,
+                dut.soc.mcu_i.cpu_i.instr_fetch_restart,
+                dut.soc.mcu_i.cpu_i.instr_fetch_stall,
+                dut.soc.mcu_i.cpu_i.instr_ready,
+                dut.soc.mcu_i.cpu_i.mem.instr_active,
+                dut.soc.mcu_i.cpu_i.mem.qspi_data_byte_idx,
+                dut.soc.mcu_i.cpu_i.mem.qspi_stall_txn,
+                dut.soc.mcu_i.cpu_i.mem.qspi_stop_txn,
+                dut.soc.mcu_i.cpu_i.mem.q_ctrl.fsm_state,
+                dut.soc.mcu_i.cpu_i.mem.q_ctrl.read_cycles_count,
+                dut.soc.mcu_i.cpu_i.mem.qspi_data_ready,
+                fcs,xip,
+                dut.soc.mcu_i.cpu_i.cpu.instr_data[0],
+                dut.soc.mcu_i.cpu_i.cpu.instr_data[1],
+                dut.soc.mcu_i.cpu_i.cpu.instr_data[2],
+                dut.soc.mcu_i.cpu_i.cpu.instr_data[3],
+                dut.soc.mcu_i.cpu_i.cpu.instr);
+        end
+    endtask
+    initial begin
+        #6500000;
+        repeat (24) begin
+            irq_trace();
+            #250000;
+        end
+        repeat (11) begin
+            irq_trace();
+            #10000000;
+        end
+    end
+`endif
     task expect_irq(input [7:0] expected);
         reg [7:0] observed;
         begin

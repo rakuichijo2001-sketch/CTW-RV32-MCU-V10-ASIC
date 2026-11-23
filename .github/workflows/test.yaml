@@ -1,9 +1,10 @@
-name: test
+name: irq-startup-30mhz-diagnostics
 on: [push, workflow_dispatch]
 jobs:
-  model:
+  diagnose:
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
-      - run: sudo apt-get update && sudo apt-get install -y iverilog yosys
-      - run: make test test-ram-guard test-timing test-sensor-asic test-sensor-pc test-pinout gate gate-irq test-v10-watchdog test-v9-rtl test-v10-python
+      - run: sudo apt-get update && sudo apt-get install -y iverilog
+      - run: make test-irq-asic
