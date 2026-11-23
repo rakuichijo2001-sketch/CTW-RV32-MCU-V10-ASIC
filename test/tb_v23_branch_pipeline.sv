@@ -110,8 +110,10 @@ module tb_v23_branch_pipeline;
         force dut.is_branch = 1'b0;
         force dut.instr_valid = 1'b1;
         force dut.branch_from_core = 1'b1;
+        #1; // permit continuous assignments to settle after hierarchical force
         if (dut.branch !== 1'b1)
-            $fatal(1, "Nonconditional redirect must retain original cycle");
+            $fatal(1, "Nonconditional redirect must retain original cycle (branch=%b raw=%b is_branch=%b valid=%b pipe=%b)",
+                dut.branch, dut.branch_from_core, dut.is_branch, dut.instr_valid, dut.branch_taken_pipe);
         @(posedge clk); #1;
         if (dut.branch_taken_pipe !== 1'b0)
             $fatal(1, "Nonconditional redirect must not enter branch pipeline");
