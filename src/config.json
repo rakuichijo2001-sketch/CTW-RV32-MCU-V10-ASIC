@@ -15,6 +15,13 @@
   "//": "Users have reported that values up to 80 worked well for them.",
   "PL_TARGET_DENSITY_PCT": 78,
 
+  "//": "V30 PnR signal integrity experiment: avoid weak clkdlybuf4s25, rebalance buffers at 0.75ns actual slew limit",
+  "EXTRA_EXCLUDED_CELLS": ["sky130_fd_sc_hd__clkdlybuf4s25_1"],
+  "DESIGN_REPAIR_REMOVE_BUFFERS": true,
+  "DESIGN_REPAIR_MAX_SLEW_PCT": 40,
+  "DESIGN_REPAIR_MAX_CAP_PCT": 40,
+  "CTS_SINK_CLUSTERING_SIZE": 8,
+
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
   "//": "The value is in nanoseconds, so 33.333ns ~= 30MHz.",
   "CLOCK_PERIOD": 33.333,
