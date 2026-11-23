@@ -15,5 +15,9 @@ jobs:
           for cfg in 0 1 2 3 4 5 6 7; do
             echo "===== CFG $cfg ====="
             iverilog -g2012 -DASIC -DIRQ_SMOKE -DDATASHEET_TIMING -DFIRST_FETCH_CHECK -Ptb_v3.QSPI_CFG=$cfg -s tb_v3 -o build/phase-$cfg src/*.v fpga/*.sv test/reference/timed_memory_fixture.sv test/reference/psram_pin_reference.sv test/tb_v3.sv
+            set +e
             vvp build/phase-$cfg
+            result=$?
+            set -e
+            echo "PHASE_SWEEP_RESULT cfg=$cfg exit=$result"
           done
