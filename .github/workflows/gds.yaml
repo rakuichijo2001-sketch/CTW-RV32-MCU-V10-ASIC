@@ -18,6 +18,9 @@ jobs:
         with:
           pdk: sky130A
 
+      - name: Enforce 30 MHz physical signoff at all corners
+        run: python3 asic/check_30mhz_signoff.py --reports runs/wokwi
+
       # Best effort to preserve design reports on failures and cancellation.
       - name: Preserve PNR diagnostics
         if: always()
