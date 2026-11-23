@@ -392,7 +392,11 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
         #1;
         $readmemh("test/sensor_demo.hex",fixture.memories.flash_i.flash,0,2047);
         #3000; fixture_power=1; ena=1;
-        sensor_d=7;
+        // ui_in[6:4] is also the hardware QSPI sample-phase strap at reset.
+        // With a 30 ns Flash pad path, keep it != 3'b111 until CPU reset
+        // releases so the controller latches phase 010 (not short-pad 001).
+        // Exercise sensor value 7 after boot; it remains valid runtime GPIO.
+        sensor_d=0;
         #1000; rst_n=1;
         #8000000; // let the on-chip boot FSM finish before checking GPIO=0
         check_led(8'ha0);
@@ -405,7 +409,7 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
         #8000000; // let the on-chip boot FSM finish before checking GPIO=0
         check_led(8'ha0);
         sample(5);
-        $display("PASS SENSOR_SMOKE 8 patterns plus reset with GPIO high at 10 MHz, modeled I/O delay %0d ns each way",TEST_PAD_NS);
+        $display("PASS SENSOR_SMOKE 8 patterns plus reset at 30 MHz, modeled I/O delay %0d ns each way",TEST_PAD_NS);
         $finish;
     end
 `elsif GATE_SMOKE
