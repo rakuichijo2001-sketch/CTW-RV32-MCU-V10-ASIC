@@ -279,6 +279,25 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
         end
     endtask
 `ifdef IRQ_SMOKE
+`ifdef ASIC
+    // Diagnostics only: sample boot and serial CPU state without modifying
+    // any DUT signal. This distinguishes fixture boot failure from a slow or
+    // blocked interrupt firmware execution at the requested 40 MHz clock.
+    initial begin : irq_asic_debug_trace
+        repeat (13) begin
+            #10000000;
+            $display("IRQ_ASIC_TRACE time_ns=%0t LED=%02x reset=%b boot_ready=%b boot_failed=%b ram_timeout=%b boot_step=%d fsm=%d instr_pc=%h instr_valid=%b counter=%d fetch_run=%b qspi_busy=%b fcs=%b acs=%b bcs=%b",
+                $time, led, rst_n, dut.soc.boot_ready, dut.soc.boot_failed,
+                dut.soc.ram_timeout, dut.soc.boot_i.step,
+                dut.soc.mcu_i.cpu_i.mem.q_ctrl.fsm_state,
+                dut.soc.mcu_i.cpu_i.cpu.pc,
+                dut.soc.mcu_i.cpu_i.cpu.instr_valid,
+                dut.soc.mcu_i.cpu_i.cpu.counter_hi,
+                dut.soc.mcu_i.cpu_i.cpu.instr_fetch_running,
+                dut.soc.mcu_i.cpu_i.mem.qspi_busy, fcs, acs, bcs);
+        end
+    end
+`endif
     task expect_irq(input [7:0] expected);
         reg [7:0] observed;
         begin
