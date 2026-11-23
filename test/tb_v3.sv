@@ -280,6 +280,13 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
     endtask
 `ifdef IRQ_SMOKE
 `ifdef ASIC
+    // Diagnostic run ends after 13 ms to capture the first fetch without
+    // requiring a full 120 ms firmware timeout on each iteration.
+    initial begin
+        #13000000;
+        $display("IRQ_TRACE_WINDOW_END t=%0t", $time);
+        $finish;
+    end
     // Observability-only diagnostic for timed-memory IRQ startup.
     // Samples at 6.5ms (after the 6ms boot POR), then every 0.25ms
     // through 12ms, then every 10ms. This modifies neither DUT nor memory.
