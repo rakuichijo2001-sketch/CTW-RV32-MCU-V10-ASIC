@@ -57,10 +57,118 @@ jobs:
         uses: TinyTapeout/tt-gds-action/gl_test@ttsky26d
 
   viewer:
-    needs: gds
+    needs: [gds, precheck, gl_test]
     runs-on: ubuntu-24.04
     permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
+      contents: read
+      actions: write
+      pages: write
+      id-token: write
+    concurrency:
+      group: gds-pages-${{ github.ref }}
+      cancel-in-progress: false
     steps:
-      - uses: TinyTapeout/tt-gds-action/viewer@ttsky26d
+      - name: Download validated GDS submission
+        uses: actions/download-artifact@v7
+        with:
+          name: tt_submission
+          path: tt_submission
+
+      - name: Download GDS preview
+        uses: actions/download-artifact@v7
+        with:
+          name: gds_render
+          path: gh-pages
+
+      - name: Prepare viewer files
+        shell: bash
+        run: |
+          set -euo pipefail
+          pdk=$(jq -er '.PDK' tt_submission/pdk.json)
+          test "$pdk" = "sky130A"
+          cp tt_submission/*.gds gh-pages/tinytapeout.gds
+          cp tt_submission/*.oas gh-pages/tinytapeout.oas
+          test -s gh-pages/tinytapeout.gds
+          test -s gh-pages/tinytapeout.oas
+          test -s gh-pages/gds_render.png
+          cat > gh-pages/index.html <<'EOF'
+          <!doctype html>
+          <html lang="en">
+          <head><meta charset="utf-8"><title>CTW RV32 MCU GDS Viewer</title></head>
+          <body>
+          <p>Opening the Tiny Tapeout GDS viewer...</p>
+          <script>
+          const model = new URL('tinytapeout.oas', location.href).href;
+          location.replace('https://gds-viewer.tinytapeout.com/?pdk=sky130A&model=' + encodeURIComponent(model));
+          </script>
+          </body>
+          </html>
+          EOF
+          echo "Prepared GDS/OAS/PNG for $pdk."
+
+      # Viewer retry must not create duplicate github-pages artifacts.
+      # Only same-run Pages artifacts are removed; GDS/signoff artifacts are untouched.
+      - name: Remove stale Pages artifacts on retry
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          ids=$(gh api "repos/${GH_REPO}/actions/runs/${GITHUB_RUN_ID}/artifacts?per_page=100" \
+            --jq '.artifacts[] | select(.name == "github-pages") | .id')
+          if [[ -n "$ids" ]]; then
+            while read -r artifact_id; do
+              [[ -z "$artifact_id" ]] && continue
+              echo "Removing previous same-run Pages artifact $artifact_id"
+              gh api -X DELETE "repos/${GH_REPO}/actions/artifacts/${artifact_id}"
+            done <<< "$ids"
+            for i in {1..24}; do
+              count=$(gh api "repos/${GH_REPO}/actions/runs/${GITHUB_RUN_ID}/artifacts?per_page=100" \
+                --jq '[.artifacts[] | select(.name == "github-pages")] | length')
+              [[ "$count" == "0" ]] && break
+              sleep 5
+            done
+            [[ "$count" == "0" ]] || { echo "::error::Old Pages artifacts still indexed"; exit 1; }
+          fi
+
+      - name: Upload one Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: gh-pages
+
+      - name: Wait for GitHub Pages artifact indexing
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          count=0
+          for i in {1..36}; do
+            count=$(gh api "repos/${GH_REPO}/actions/runs/${GITHUB_RUN_ID}/artifacts?per_page=100" \
+              --jq '[.artifacts[] | select(.name == "github-pages" and .expired == false)] | length')
+            echo "Pages artifacts indexed: $count (poll $i)"
+            [[ "$count" == "1" ]] && break
+            [[ "$count" -gt 1 ]] && { echo "::error::Duplicate Pages artifacts"; exit 1; }
+            sleep 5
+          done
+          [[ "$count" == "1" ]] || { echo "::error::Pages artifact not visible"; exit 1; }
+          sleep 12
+
+      - name: Deploy GitHub Pages Viewer
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+      - name: Publish viewer link
+        shell: bash
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          page_url="${PAGE_URL%/}"
+          {
+            echo '### CTW RV32 MCU — 4x2, 30 MHz'
+            echo "[3D GDS Viewer](https://gds-viewer.tinytapeout.com/?model=${page_url}/tinytapeout.oas&pdk=sky130A)"
+            echo "[GDS Explorer](https://gds-explorer.tinytapeout.com/viewer?file=${page_url}/tinytapeout.oas&pdk=sky130A)"
+          } >> "$GITHUB_STEP_SUMMARY"
