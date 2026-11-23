@@ -102,8 +102,14 @@ module ctw_mcu_pads #(
         .sck(b_sck),.flash_cs_n(b_fcs),.rama_cs_n(b_acs),.ramb_cs_n(b_bcs),
         .ready(boot_ready),.failed(boot_failed)
     );
-    // Keep the sample setting validated in V4. External ui[6:4]
-    // are now ordinary GPIOs, including while reset is active.
+    // V28 QSPI sampling strap. For boards with short external Flash delays,
+    // hold ui[6:4]=111 throughout CPU reset/boot to select sample phase 001.
+    // All other patterns use the default 010 required by the 30ns-pad
+    // timed Flash fixture. The QSPI controller samples this only while
+    // its reset is asserted; after boot, ui[6:4] remain normal GPIOs.
+    // This is a real hardware-selectable interface, NOT a test-only define.
+    wire [2:0] qspi_read_delay_selected =
+        (&ui_in[6:4]) ? 3'b001 : QSPI_READ_DELAY_CFG;
     ctw_mcu #(.UART_DIV(UART_DIV)) mcu_i (
         .clk(clk), .rst_n(boot_rst_n && boot_ready && !ram_timeout), .ena(ena),
         .gpio_in(ui_in), .gpio_out(gpio_out),
@@ -115,7 +121,7 @@ module ctw_mcu_pads #(
         .wdt_kick(wdt_kick), .wdt_event_count(wdt_events),
         .wdt_last_reset(wdt_cause), .wdt_elapsed_ms(wdt_elapsed_ms),
         .uart_rx(ui_in[7]),
-        .uart_tx(uart_tx), .delay_cfg(QSPI_READ_DELAY_CFG), .dq_in(dq_in),
+        .uart_tx(uart_tx), .delay_cfg(qspi_read_delay_selected), .dq_in(dq_in),
         .dq_out(cpu_dq), .dq_oe(cpu_oe), .sck(cpu_sck), .flash_cs_n(cpu_fcs),
         .rama_cs_n(cpu_acs), .ramb_cs_n(cpu_bcs), .enabled(cpu_active)
     );

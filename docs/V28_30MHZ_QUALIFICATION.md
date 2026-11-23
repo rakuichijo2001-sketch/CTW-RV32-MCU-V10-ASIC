@@ -50,3 +50,19 @@ pad contention at the following redirect. QSPI now introduces a deselected
 turnaround state with busy asserted after stop and before a subsequent
 transaction start. This change must pass full IRQ, smoke, timed RAM,
 gate-level and post-route STA checks before being considered qualified.
+
+## 30 MHz Flash timing selection through real reset-time GPIO strap
+
+The ASIC now reads `ui_in[6:4]` while the CPU is held in reset during
+memory boot. Setting all three pins HIGH selects low-delay Flash read
+configuration 001; all other input patterns use default 010. Following CPU
+reset release the same pins retain their ordinary GPIO role (QSPI captures
+the selection only during reset). The untimed ASIC RTL fixture sets all
+three HIGH during boot to model short board propagation; the timed 30 ns
+fixture leaves them LOW, modeling the longer roundtrip. This is **one RTL
+design with a physical boot strap**, not a simulator-only choice.
+
+This strap must be wired/documented for the actual test board. The default
+010 must still pass the timed firmware IRQ sequence and the final netlist
+must pass GDS/GL/STA. Confirm any GPIO6:4 changes during warm reset do not
+select an unintended sample mode.

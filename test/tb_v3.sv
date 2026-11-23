@@ -14,7 +14,17 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
     reg clk=0;
     always #(CLK_NS/2) clk=!clk;
     reg [1:0] key=2'b11;
-    reg [2:0] sensor_d=0;
+`ifdef ASIC
+`ifdef DATASHEET_TIMING
+    // Exercise the actual QSPI boot strap. 30ns pad path needs phase 010;
+    // short 0/10ns model needs phase 001. No synthesized RTL differs.
+    reg [2:0] sensor_d=(TEST_PAD_NS>=20 ? 3'b000 : 3'b111);
+`else
+    reg [2:0] sensor_d=3'b111; // zero-delay memory fixture: phase 001
+`endif
+`else
+    reg [2:0] sensor_d=3'b000;
+`endif
     reg sensor_rx=1;
     wire sensor_tx;
     reg rst_n=0, ena=0, fixture_power=0;
