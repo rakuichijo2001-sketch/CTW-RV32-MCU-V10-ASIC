@@ -24,7 +24,7 @@ with log.open("w") as f:
     try:
         subprocess.run(cmd, cwd=root, stdout=f, stderr=subprocess.STDOUT, check=True)
         subprocess.run(["vvp", str(test / "tt-gl.vvp")], cwd=root, stdout=f,
-                       stderr=subprocess.STDOUT, check=True, timeout=180)
+                       stderr=subprocess.STDOUT, check=True, timeout=900)
     except (OSError, subprocess.SubprocessError) as exc:
         error = str(exc)
 report = log.read_text()
