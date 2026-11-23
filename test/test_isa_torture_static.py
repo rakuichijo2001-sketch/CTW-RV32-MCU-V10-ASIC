@@ -17,9 +17,9 @@ class TestISAArtifact(unittest.TestCase):
             self.assertLessEqual(len(b),4096)
             self.assertNotEqual(zlib.crc32(b),0)
     def test_clock_metadata(self):
-        self.assertIn('clock_hz: 20000000',(ROOT/'info.yaml').read_text())
-        self.assertIn('"CLOCK_PERIOD": 50,',(ROOT/'src/config.json').read_text())
-        self.assertIn('CLK_HZ=20000000',(ROOT/'src/tt_um_ctw_rv32_mcu.v').read_text())
+        self.assertIn('clock_hz: 50000000',(ROOT/'info.yaml').read_text())
+        self.assertIn('"CLOCK_PERIOD": 20,',(ROOT/'src/config.json').read_text())
+        self.assertIn('CLK_HZ=50000000',(ROOT/'src/tt_um_ctw_rv32_mcu.v').read_text())
         self.assertIn('CLK_HZ(50000000)',(ROOT/'ctw_de10_top.sv').read_text())
     def test_gp_tp_implemented_as_writable_gprs(self):
         s=(ROOT/'src/register.v').read_text()

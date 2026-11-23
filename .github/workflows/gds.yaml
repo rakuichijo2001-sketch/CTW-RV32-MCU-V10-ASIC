@@ -18,6 +18,22 @@ jobs:
         with:
           pdk: sky130A
 
+      # Best effort to preserve design reports on failures and cancellation.
+      - name: Preserve PNR diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pnr_diagnostics
+          retention-days: 14
+          if-no-files-found: ignore
+          path: |
+            runs/wokwi/**/*.log
+            runs/wokwi/**/*.rpt
+            runs/wokwi/**/or_metrics_out.json
+            runs/wokwi/**/state_out.json
+            runs/wokwi/**/runtime.txt
+            runs/wokwi/**/*.def
+
   precheck:
     needs: gds
     runs-on: ubuntu-24.04
