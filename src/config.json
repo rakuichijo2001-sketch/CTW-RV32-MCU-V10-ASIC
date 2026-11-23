@@ -16,8 +16,8 @@
   "PL_TARGET_DENSITY_PCT": 78,
 
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
-  "//": "The value is in nanoseconds, so 25ns == 40MHz.",
-  "CLOCK_PERIOD": 25,
+  "//": "The value is in nanoseconds, so 33.333ns ~= 30MHz.",
+  "CLOCK_PERIOD": 33.333,
 
   "//": "Hold slack margin - Increase them in case you are getting hold violations.",
   "PL_RESIZER_HOLD_SLACK_MARGIN": 0.1,

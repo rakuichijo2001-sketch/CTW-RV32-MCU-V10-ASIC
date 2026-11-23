@@ -66,7 +66,7 @@ test-timing:
 
 test-ram-guard:
 	mkdir -p build
-	set -e; for period in 20 25 100; do \
+	set -e; for period in 20 25 33 100; do \
 	  $(IVERILOG) -g2012 -Ptb_ram_guard.CLK_NS=$$period -s tb_ram_guard -o build/guard-$$period $(RTL) test/reference/tb_ram_guard.sv; \
 	  $(VVP) build/guard-$$period; \
 	done
