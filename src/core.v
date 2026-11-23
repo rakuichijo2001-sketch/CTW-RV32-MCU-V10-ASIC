@@ -51,7 +51,15 @@ module tinyqv_core #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
     output [3:0] debug_rd
 );
 
-    wire last_count = (counter == 7);
+    // V24 timing repair: register the terminal nibble phase one clock ahead.
+    // The serial CPU counter progresses 0..7 every clock; therefore the
+    // phase-7 marker can be captured at phase 6, removing counter-bit decode
+    // from the branch/retire/address-ready critical control cone.
+    reg last_count;
+    always @(posedge clk) begin
+        if (!rstn) last_count <= 1'b0;
+        else       last_count <= (counter == 3'd6);
+    end
     reg [1:0] cycle;
 
     wire is_shift = alu_op[1:0] == 2'b01;
