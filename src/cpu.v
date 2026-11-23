@@ -354,6 +354,16 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
     reg instr_fetch_running;
 
     wire [23:0] next_pc = {instr_data_start, 3'b000} + {20'd0, next_pc_offset, 1'b0};
+
+    // V25 Fmax experiment: the serial CPU commits its PC at phase 7. The
+    // sequential fall-through PC is stable before that point, so calculate
+    // the 24-bit addition at phase 6 and use only a short register mux at
+    // commit. This preserves branch/ret behavior and adds no instruction cycle.
+    reg [23:0] next_pc_lookahead_q;
+    always @(posedge clk) begin
+        if (!rstn) next_pc_lookahead_q <= 24'd0;
+        else if (counter_hi == 3'd6) next_pc_lookahead_q <= next_pc;
+    end
     wire pc_wrap = next_pc_offset[3] && instr_complete;
 
     wire [3:1] next_instr_write_offset = instr_write_offset + (instr_ready && instr_fetch_running ? 3'b001 : 3'b000) - (pc_wrap ? 3'b100 : 3'b000);
@@ -423,7 +433,7 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
 
                 if (instr_complete) begin
                     pc_offset <= next_pc_offset[2:1];
-                    instr_data_start <= next_pc[23:3];
+                    instr_data_start <= next_pc_lookahead_q[23:3];
                 end
             end
         end
