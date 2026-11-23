@@ -15,15 +15,19 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
     always #(CLK_NS/2) clk=!clk;
     reg [1:0] key=2'b11;
 `ifdef ASIC
+    // Sensor data must not affect QSPI phase selection during reset.
+    // Deliberately start with 111 to guard against the former V28 hazard.
+    reg [2:0] sensor_d=3'b111;
 `ifdef DATASHEET_TIMING
-    // Exercise the actual QSPI boot strap. 30ns pad path needs phase 010;
-    // short 0/10ns model needs phase 001. No synthesized RTL differs.
-    reg [2:0] sensor_d=(TEST_PAD_NS>=20 ? 3'b000 : 3'b111);
+    // Explicit boot-only ui_in[1] strap, independent from sensor_data.
+    // 0/10 ns pad cases use phase 001; 30 ns uses phase 010.
+    reg short_pad_strap=(TEST_PAD_NS<20);
 `else
-    reg [2:0] sensor_d=3'b111; // zero-delay memory fixture: phase 001
+    reg short_pad_strap=1'b1; // zero-delay fixture uses phase 001
 `endif
 `else
     reg [2:0] sensor_d=3'b000;
+    reg short_pad_strap=1'b0; // ignored by the DE10 FPGA wrapper
 `endif
     reg sensor_rx=1;
     wire sensor_tx;
@@ -53,7 +57,7 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
 `ifdef GL_TEST
         .VPWR(vpwr),.VGND(vgnd),
 `endif
-        .ui_in({sensor_rx,sensor_d,3'b0,!key[1]}),.uio_in(bus),.uo_out(uo),.uio_out(mcu_o),
+        .ui_in({sensor_rx,sensor_d,2'b0,short_pad_strap,!key[1]}),.uio_in(bus),.uo_out(uo),.uio_out(mcu_o),
         .uio_oe(mcu_oe),.ena(ena),.clk(clk),.rst_n(rst_n && key[0])
     );
     // ASIC GPIO outputs 0..4 are observable, while uo[5:6] are the RAM
@@ -392,11 +396,9 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
         #1;
         $readmemh("test/sensor_demo.hex",fixture.memories.flash_i.flash,0,2047);
         #3000; fixture_power=1; ena=1;
-        // ui_in[6:4] is also the hardware QSPI sample-phase strap at reset.
-        // With a 30 ns Flash pad path, keep it != 3'b111 until CPU reset
-        // releases so the controller latches phase 010 (not short-pad 001).
-        // Exercise sensor value 7 after boot; it remains valid runtime GPIO.
-        sensor_d=0;
+        // Verify that all-high sensor data during reset no longer overrides
+        // the independently strapped 30 ns QSPI read phase.
+        sensor_d=7;
         #1000; rst_n=1;
         #8000000; // let the on-chip boot FSM finish before checking GPIO=0
         check_led(8'ha0);

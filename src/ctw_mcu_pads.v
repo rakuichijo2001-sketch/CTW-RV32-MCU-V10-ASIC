@@ -6,7 +6,8 @@ module ctw_mcu_pads #(
     parameter integer CLK_HZ=20000000,
     parameter integer UART_DIV=174,
     parameter integer POWERUP_US=6000,
-    parameter [2:0] QSPI_READ_DELAY_CFG=3'b000
+    parameter [2:0] QSPI_READ_DELAY_CFG=3'b000,
+    parameter integer QSPI_READ_STRAP_EN=0
 )(
     input wire [7:0] ui_in, uio_in,
     output wire [7:0] uo_out, uio_out, uio_oe,
@@ -102,14 +103,16 @@ module ctw_mcu_pads #(
         .sck(b_sck),.flash_cs_n(b_fcs),.rama_cs_n(b_acs),.ramb_cs_n(b_bcs),
         .ready(boot_ready),.failed(boot_failed)
     );
-    // V28 QSPI sampling strap. For boards with short external Flash delays,
-    // hold ui[6:4]=111 throughout CPU reset/boot to select sample phase 001.
-    // All other patterns use the default 010 required by the 30ns-pad
-    // timed Flash fixture. The QSPI controller samples this only while
-    // its reset is asserted; after boot, ui[6:4] remain normal GPIOs.
-    // This is a real hardware-selectable interface, NOT a test-only define.
+    // V29: dedicated boot-only QSPI phase strap on ui_in[1] (GPIO1),
+    // independent of live sensor input ui_in[6:4]. Sensor values can now
+    // be any pattern, including 111, during both cold and warm reset.
+    // ASIC: keep ui_in[1]=0 through reset/boot for 30 ns pad flight-time
+    // (phase 010); tie it high for short-pad mode (phase 001).
+    // FPGA defaults to no strap and retains its existing QSPI delay setting.
+    // The CPU QSPI controller latches the phase while CPU reset is asserted;
+    // after boot ui_in[1] resumes normal GPIO operation.
     wire [2:0] qspi_read_delay_selected =
-        (&ui_in[6:4]) ? 3'b001 : QSPI_READ_DELAY_CFG;
+        (QSPI_READ_STRAP_EN && ui_in[1]) ? 3'b001 : QSPI_READ_DELAY_CFG;
     ctw_mcu #(.UART_DIV(UART_DIV)) mcu_i (
         .clk(clk), .rst_n(boot_rst_n && boot_ready && !ram_timeout), .ena(ena),
         .gpio_in(ui_in), .gpio_out(gpio_out),

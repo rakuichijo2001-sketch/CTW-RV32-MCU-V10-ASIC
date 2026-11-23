@@ -28,7 +28,7 @@ project:
 
 pinout:
   ui[0]: "GPIO0"
-  ui[1]: "GPIO1"
+  ui[1]: "GPIO1 / Boot QSPI short-pad strap (0: 30ns, 1: short)"
   ui[2]: "GPIO2"
   ui[3]: "GPIO3"
   ui[4]: "GPIO4 / Sensor D0"
