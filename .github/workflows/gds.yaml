@@ -72,7 +72,9 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: tt_submission
-          path: tt_submission
+          # Artifact already contains its own tt_submission/ directory.
+          # Extract at workspace root to avoid tt_submission/tt_submission nesting.
+          path: .
 
       - name: Download GDS preview
         uses: actions/download-artifact@v7
