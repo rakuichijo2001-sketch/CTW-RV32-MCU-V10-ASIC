@@ -28,6 +28,8 @@
   "PNR_CORNERS": ["nom_tt_025C_1v80", "nom_ss_100C_1v60", "nom_ff_n40C_1v95"],
   "//": "V30i: use the physically slow corner to size buffers; break long wires and over-repair slew/cap before detailed routing",
   "DEFAULT_CORNER": "max_ss_100C_1v60",
+  "//": "V30j alternative: use SKY130 HD library 1.5 ns max transition rather than flow default 0.75 ns, without changing 30 MHz or setup/hold limits",
+  "MAX_TRANSITION_CONSTRAINT": 1.5,
   "GRT_DESIGN_REPAIR_MAX_WIRE_LENGTH": 100,
   "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 40,
   "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 40,
