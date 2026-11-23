@@ -361,12 +361,25 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
 
     wire [23:1] early_branch_addr = pc[23:1] + imm[23:1];
 
+    // V22 experimental: instruction-buffer writes are not architecturally
+    // committed by the branch decision. A redirect resets fetch/write cursors,
+    // so an in-flight halfword arriving on the redirect edge is stale and is
+    // ignored by the new fetch window. Permit that physical buffer write to
+    // remove the long counter -> ALU compare -> branch -> 64-bit buffer CE path.
+    // This is intentionally isolated from V21 pending full RTL/GL regressions.
     always @(posedge clk) begin
         if (!rstn) begin
             instr_data[0][1:0] <= 2'b11;
             instr_data[1][1:0] <= 2'b11;
             instr_data[2][1:0] <= 2'b11;
             instr_data[3][1:0] <= 2'b11;
+        end else if (instr_ready && instr_fetch_running) begin
+            instr_data[instr_write_offset[2:1]] <= instr_data_in;
+        end
+    end
+
+    always @(posedge clk) begin
+        if (!rstn) begin
             instr_data_start <= 0;
             pc_offset <= 0;
             instr_write_offset <= 0;
@@ -402,9 +415,6 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
                 if (instr_complete) begin
                     pc_offset <= next_pc_offset[2:1];
                     instr_data_start <= next_pc[23:3];
-                end
-                if (instr_ready && instr_fetch_running) begin
-                    instr_data[instr_write_offset[2:1]] <= instr_data_in;
                 end
             end
         end
