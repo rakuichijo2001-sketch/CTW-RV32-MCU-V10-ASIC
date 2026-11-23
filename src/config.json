@@ -20,6 +20,9 @@
   "DESIGN_REPAIR_REMOVE_BUFFERS": false,
   "DESIGN_REPAIR_MAX_SLEW_PCT": 40,
   "DESIGN_REPAIR_MAX_CAP_PCT": 40,
+  "//": "V30g: limit fanout of internal nets and repair routed capacitance/slew with the original 0.75ns limit",
+  "MAX_FANOUT_CONSTRAINT": 6,
+  "RUN_POST_GRT_DESIGN_REPAIR": true,
   "CTS_SINK_CLUSTERING_SIZE": 6,
   "PNR_CORNERS": ["nom_tt_025C_1v80", "nom_ss_100C_1v60", "nom_ff_n40C_1v95"],
 
