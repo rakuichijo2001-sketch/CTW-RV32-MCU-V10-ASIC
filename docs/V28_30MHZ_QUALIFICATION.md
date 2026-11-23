@@ -40,3 +40,13 @@ The prior 40 MHz RTL regression failed at `test-irq-asic` with the
 `ctw_timed_memory_fixture` despite passing model/ASIC smoke tests.
 Do NOT waive this test. This branch adds dedicated diagnosis/repair before
 qualifying any 30 MHz release.
+
+## QSPI/Flash timed IRQ repair (experimental until full test PASS)
+
+After 30 MHz timed-memory IRQ trace, the first instruction bytes were
+misread at the former 001 sampling phase. At phase 010, the first two
+halfwords are correctly read as 006f, 00c0 but the timing fixture reports
+pad contention at the following redirect. QSPI now introduces a deselected
+turnaround state with busy asserted after stop and before a subsequent
+transaction start. This change must pass full IRQ, smoke, timed RAM,
+gate-level and post-route STA checks before being considered qualified.

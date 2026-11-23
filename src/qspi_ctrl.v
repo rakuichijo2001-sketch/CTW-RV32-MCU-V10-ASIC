@@ -55,12 +55,17 @@ module qspi_controller (
     localparam FSM_DATA = 5;
     localparam FSM_STALLED = 6;
     localparam FSM_STALL_RECOVER = 7;
+    // Keep memory deselected long enough for external pad and device output
+    // disable delays after a fetch redirect. During turnaround busy remains
+    // asserted, so the memory arbiter cannot issue a phantom start request.
+    localparam FSM_TURNAROUND = 8;
 
     localparam [7:0] PSRAM_QPI_READ_CMD  = 8'hEB;
     localparam [7:0] PSRAM_QPI_WRITE_CMD = 8'h02;
     localparam [2:0] PSRAM_QPI_READ_WAIT_CLOCKS = 3'd6;
 
-    reg [2:0] fsm_state;
+    reg [3:0] fsm_state;
+    reg [1:0] turnaround_count;
     reg       is_writing;
     reg [ADDR_BITS-1:0]       addr;
     reg [DATA_WIDTH_BITS-1:0] data;
@@ -109,7 +114,13 @@ module qspi_controller (
 
     always @(posedge clk) begin
         if (!rstn || stop_txn_now) begin
-            fsm_state <= FSM_IDLE;
+            // A stop can release Flash DQ only after a pad round-trip delay.
+            // Add two full idle clocks before a new instruction fetch starts.
+            // At 30 MHz this gives >= 66.7 ns CS-high turnaround (plus the
+            // following restart edge) and prevents electrical bus contention
+            // with the delayed Flash output-enable in the timed fixture.
+            fsm_state <= !rstn ? FSM_IDLE : FSM_TURNAROUND;
+            turnaround_count <= !rstn ? 2'd0 : 2'd1;
             is_writing <= 0;
             nibbles_remaining <= 0;
             data_ready <= 0;
@@ -124,7 +135,12 @@ module qspi_controller (
             data_ready <= 0;
             data_req <= 0;
 
-            if (fsm_state == FSM_IDLE) begin
+            if (fsm_state == FSM_TURNAROUND) begin
+                if (turnaround_count == 2'd0)
+                    fsm_state <= FSM_IDLE;
+                else
+                    turnaround_count <= turnaround_count - 2'd1;
+            end else if (fsm_state == FSM_IDLE) begin
                 if ((start_read || start_write) && !ram_a_block && !ram_b_block) begin
                     // Flash has no command phase: it is assumed to be in
                     // continuous read mode. RAM always starts with a QPI command.
