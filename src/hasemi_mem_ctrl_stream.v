@@ -68,7 +68,12 @@ module hasemi_mem_ctrl_stream (
 
     wire is_instr = instr_active || start_instr;
     wire [1:0] txn_len = is_instr ? 2'b01 : data_txn_len;
-    wire [24:0] cpu_addr_in = is_instr ? {1'b0, instr_addr, 1'b0} : data_addr[24:0];
+    // Address is only sampled by qspi_controller when a NEW transaction starts.
+    // Use the already-registered CPU request flags to choose data vs fetch;
+    // do not put the instr_active/start_instr control cone in front of all
+    // 25 address bits. During a running transaction addr_in is not sampled.
+    wire cpu_data_request = (data_read_n != 2'b11) || (data_write_n != 2'b11);
+    wire [24:0] cpu_addr_in = cpu_data_request ? data_addr[24:0] : {1'b0, instr_addr, 1'b0};
 
     reg [31:0] qspi_data_buf;
     reg [1:0] qspi_data_byte_idx;
