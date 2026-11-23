@@ -206,3 +206,10 @@ test-v10-gpr-rtl:
 	mkdir -p build
 	$(IVERILOG) -g2012 -s tb_v10_gp_tp_gpr -o build/v10-gpr src/register.v test/tb_v10_gp_tp_gpr.sv
 	$(VVP) build/v10-gpr
+
+# 30MHz IRQ timed Flash first-fetch/turnaround regression.
+.PHONY: test-irq-first-fetch
+test-irq-first-fetch:
+	mkdir -p build
+	$(IVERILOG) -g2012 -DASIC -DIRQ_SMOKE -DDATASHEET_TIMING -DFIRST_FETCH_CHECK -s tb_v3 -o build/irq-first-fetch $(RTL) $(MODELS) test/reference/timed_memory_fixture.sv test/reference/psram_pin_reference.sv test/tb_v3.sv
+	$(VVP) build/irq-first-fetch

@@ -279,6 +279,36 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
         end
     endtask
 `ifdef IRQ_SMOKE
+`ifdef FIRST_FETCH_CHECK
+`ifdef ASIC
+    // Fast timed-Flash correctness check before the 120ms IRQ test.
+    // The IRQ image starts with 0x00c0006f (JAL +12).
+    // The real flash fixture must return the first two little-endian halfwords
+    // 006f, 00c0. A bad SPI read phase previously returned z6z6/f0z6.
+    initial begin : irq_first_fetch_check
+        wait(dut.soc.boot_ready === 1'b1);
+        @(posedge dut.soc.mcu_i.cpu_i.instr_ready);
+        #1;
+        if (dut.soc.mcu_i.cpu_i.instr_data !== 16'h006f)
+            $fatal(1, "IRQ_FLASH_FIRST wrong first halfword %h (expected 006f)",
+                dut.soc.mcu_i.cpu_i.instr_data);
+        @(posedge dut.soc.mcu_i.cpu_i.instr_ready);
+        #1;
+        if (dut.soc.mcu_i.cpu_i.instr_data !== 16'h00c0)
+            $fatal(1, "IRQ_FLASH_FIRST wrong second halfword %h (expected 00c0)",
+                dut.soc.mcu_i.cpu_i.instr_data);
+        // Redirect at JAL can cause another transaction before the device
+        // releases its QSPI outputs. Existing contention asserts remain live.
+        #300000;
+        $display("PASS IRQ_FLASH_FIRST: correct JAL halfwords and no early QSPI contention");
+        $finish;
+    end
+    initial begin
+        #7500000;
+        $fatal(1, "IRQ_FLASH_FIRST timeout waiting for Flash fetch");
+    end
+`endif
+`endif
     task expect_irq(input [7:0] expected);
         reg [7:0] observed;
         begin
