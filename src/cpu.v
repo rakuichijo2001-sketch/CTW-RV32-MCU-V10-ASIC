@@ -361,6 +361,15 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
 
     wire [23:1] early_branch_addr = pc[23:1] + imm[23:1];
 
+    // Precompute the conditional branch target at nibble phase 6. The PC
+    // and immediate are stable throughout the current instruction; at phase 7
+    // the redirect only muxes the stored target (no 23-bit add on that path).
+    reg [23:1] early_branch_target_q;
+    always @(posedge clk) begin
+        if (!rstn) early_branch_target_q <= 23'b0;
+        else if (counter_hi == 3'd6) early_branch_target_q <= early_branch_addr;
+    end
+
     // V22 experimental: instruction-buffer writes are not architecturally
     // committed by the branch decision. A redirect resets fetch/write cursors,
     // so an in-flight halfword arriving on the redirect edge is stale and is
@@ -389,9 +398,9 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
 
             if (branch) begin
                 if (is_branch && instr_valid) begin
-                    instr_data_start <= early_branch_addr[23:3];
-                    instr_write_offset <= {1'b0, early_branch_addr[2:1]};
-                    pc_offset <= early_branch_addr[2:1];
+                    instr_data_start <= early_branch_target_q[23:3];
+                    instr_write_offset <= {1'b0, early_branch_target_q[2:1]};
+                    pc_offset <= early_branch_target_q[2:1];
                 end else begin
                     instr_data_start <= addr_out[23:3];
                     instr_write_offset <= {1'b0, addr_out[2:1]};
