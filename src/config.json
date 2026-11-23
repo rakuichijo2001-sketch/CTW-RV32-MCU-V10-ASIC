@@ -52,7 +52,8 @@
   "RUN_KLAYOUT_DRC": 1,
 
   "//": "Don't put clock buffers on the outputs",
-  "DESIGN_REPAIR_BUFFER_OUTPUT_PORTS": 0,
+  "//": "V30c LVS fix: force dedicated output buffers to prevent physical top-level pin aliasing",
+  "DESIGN_REPAIR_BUFFER_OUTPUT_PORTS": 1,
 
   "//": "Reduce wasted space",
   "TOP_MARGIN_MULT": 1,
