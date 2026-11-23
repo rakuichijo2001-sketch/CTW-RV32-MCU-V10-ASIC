@@ -218,9 +218,13 @@ module qspi_controller (
     end
 
     always @(posedge clk) begin
-        if (fsm_state == FSM_IDLE && (start_read || start_write)) begin
-            // Each PSRAM has a separate chip-select; A23 selects the bank in
-            // the SoC map and is not a physical address bit of either 8 MiB IC.
+        if (fsm_state == FSM_IDLE) begin
+            // Prefetch the currently selected address while idle. The FSM
+            // accepts a transaction only on a start pulse, and this register
+            // is not consumed until the following FSM_ADDR cycle. Removing
+            // the start_read/start_write enable from the 24-bit addr flop
+            // avoids a deep CPU-control-to-QSPI address critical path.
+            // A23 is the PSRAM bank selector, not a physical address bit.
             addr <= {addr_in[24] ? 1'b0 : addr_in[23], addr_in[22:0]};
         end else if (fsm_state == FSM_ADDR && spi_clk_out) begin
             addr <= {addr[ADDR_BITS-5:0], 4'b0000};
