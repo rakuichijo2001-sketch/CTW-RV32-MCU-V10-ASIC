@@ -130,7 +130,16 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
     wire [27:0] addr_out;
     wire address_ready;
     wire instr_complete_core;
-    wire branch;
+    wire branch_from_core;
+    // The 32-bit-serial CPU resolves the final branch comparison in nibble 7.
+    // Register ONLY conditional-branch resolution; other redirects retain their
+    // original cycle. This cuts the compare -> PC/fetch control path into two
+    // single-cycle paths at the cost of one cycle for a taken conditional branch.
+    reg        branch_taken_pipe;
+    reg [23:1] branch_target_pipe;
+    wire branch = branch_taken_pipe ||
+                  (branch_from_core && !(is_branch && instr_valid));
+    wire instr_valid_core = instr_valid && !branch_taken_pipe;
     wire [23:1] return_addr;
     wire interrupt_pending;
     wire any_additional_mem_ops = additional_mem_ops != 3'b000;
@@ -140,7 +149,9 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
 
     reg no_write_in_progress;
     reg load_started;
-    wire stall_core = !instr_valid || ((is_store || is_load) && !no_write_in_progress);
+    // On a taken branch, the sequentially decoded instruction is speculative
+    // for one cycle. Mask it from the core until the redirect is committed.
+    wire stall_core = !instr_valid_core || ((is_store || is_load) && !no_write_in_progress);
     wire instr_complete = instr_complete_core && !stall_core && !any_additional_mem_ops;
 
     reg [2:1] pc_offset;
@@ -214,8 +225,10 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
         end else if (any_additional_mem_ops && instr_complete_core && !stall_core) begin
         end else if (instr_complete_core && interrupt_pending) begin
         end else if (((counter_hi == 3'd7 && !instr_valid) || instr_complete) && {1'b0,instr_len_de} <= instr_avail_len) begin
-            early_branch = is_jal_de && !branch;
-            is_ret = is_ret_de && !branch;
+            // Do not launch an early JAL fetch from a speculative fallthrough
+            // while a conditional branch is still resolving in the pipeline.
+            early_branch = is_jal_de && !branch && !(is_branch && instr_valid);
+            is_ret = is_ret_de && !branch && !(is_branch && instr_valid);
         end
     end
 
@@ -306,16 +319,16 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
         imm[11:0],
         csr_zimm,
 
-        is_load && instr_valid && no_write_in_progress,
-        is_alu_imm && instr_valid,
-        is_auipc && instr_valid,
-        is_store && instr_valid && no_write_in_progress,
-        is_alu_reg && instr_valid,
-        is_lui && instr_valid,
-        is_branch && instr_valid,
-        is_jalr && instr_valid,
-        is_jal && instr_valid,
-        is_system && instr_valid,
+        is_load && instr_valid_core && no_write_in_progress,
+        is_alu_imm && instr_valid_core,
+        is_auipc && instr_valid_core,
+        is_store && instr_valid_core && no_write_in_progress,
+        is_alu_reg && instr_valid_core,
+        is_lui && instr_valid_core,
+        is_branch && instr_valid_core,
+        is_jalr && instr_valid_core,
+        is_jal && instr_valid_core,
+        is_system && instr_valid_core,
         interrupt_core,
         stall_core && !interrupt_core,
 
@@ -336,7 +349,7 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
         addr_out,
         address_ready,
         instr_complete_core,
-        branch,
+        branch_from_core,
         return_addr,
 
         interrupt_req,
@@ -360,6 +373,21 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
     wire next_instr_stall = (next_instr_write_offset == {1'b1, pc_offset});
 
     wire [23:1] early_branch_addr = pc[23:1] + imm[23:1];
+
+    // Conditional branch pipeline stage BR: snapshot the final comparison and
+    // its already-computed target at phase 7. In phase 0 branch_taken_pipe
+    // redirects the fetch machine. The raw ALU comparator no longer directly
+    // drives the PC and fetch-buffer write/selection networks.
+    always @(posedge clk) begin
+        if (!rstn) begin
+            branch_taken_pipe <= 1'b0;
+            branch_target_pipe <= 23'b0;
+        end else begin
+            branch_taken_pipe <= is_branch && instr_valid && branch_from_core;
+            if (counter_hi == 3'd7 && is_branch && instr_valid)
+                branch_target_pipe <= early_branch_addr;
+        end
+    end
 
     // V22 experimental: instruction-buffer writes are not architecturally
     // committed by the branch decision. A redirect resets fetch/write cursors,
@@ -388,7 +416,11 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
         end else begin
 
             if (branch) begin
-                if (is_branch && instr_valid) begin
+                if (branch_taken_pipe) begin
+                    instr_data_start <= branch_target_pipe[23:3];
+                    instr_write_offset <= {1'b0, branch_target_pipe[2:1]};
+                    pc_offset <= branch_target_pipe[2:1];
+                end else if (is_branch && instr_valid) begin
                     instr_data_start <= early_branch_addr[23:3];
                     instr_write_offset <= {1'b0, early_branch_addr[2:1]};
                     pc_offset <= early_branch_addr[2:1];
@@ -397,7 +429,7 @@ module tinyqv_cpu #(parameter NUM_REGS=16, parameter REG_ADDR_BITS=4) (
                     instr_write_offset <= {1'b0, addr_out[2:1]};
                     pc_offset <= addr_out[2:1];
                 end
-                instr_fetch_running <= was_early_branch;
+                instr_fetch_running <= branch_taken_pipe ? 1'b0 : was_early_branch;
             end
             else if (is_ret) begin
                 instr_data_start <= return_addr[23:3];
