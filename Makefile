@@ -206,3 +206,10 @@ test-v10-gpr-rtl:
 	mkdir -p build
 	$(IVERILOG) -g2012 -s tb_v10_gp_tp_gpr -o build/v10-gpr src/register.v test/tb_v10_gp_tp_gpr.sv
 	$(VVP) build/v10-gpr
+
+# V23 conditional-branch pipeline control: taken / not-taken / original redirects.
+.PHONY: test-v23-branch-pipeline
+test-v23-branch-pipeline:
+	mkdir -p build
+	$(IVERILOG) -g2012 -s tb_v23_branch_pipeline -o build/v23-branch-pipeline $(RTL) test/tb_v23_branch_pipeline.sv
+	$(VVP) build/v23-branch-pipeline
