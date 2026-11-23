@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module tb_v3 #(parameter integer TEST_PAD_NS=30);
+module tb_v3 #(parameter integer TEST_PAD_NS=30, parameter [2:0] QSPI_CFG=3'b010);
 `ifdef ASIC
     // Match 30 MHz ASIC clock (33.333... ns) configured in info.yaml/src/config.json.
     localparam real CLK_NS=1000.0/30.0;
@@ -39,7 +39,7 @@ module tb_v3 #(parameter integer TEST_PAD_NS=30);
     supply1 vpwr;
     supply0 vgnd;
 `endif
-    tt_um_ctw_rv32_mcu dut(
+    tt_um_ctw_rv32_mcu #(.QSPI_READ_DELAY_CFG(QSPI_CFG)) dut(
 `ifdef GL_TEST
         .VPWR(vpwr),.VGND(vgnd),
 `endif

@@ -76,6 +76,21 @@ module qspi_controller (
     assign data_out = data;
     assign busy = fsm_state != FSM_IDLE;
 
+    // Flash QSPI at 30MHz core is source-synchronous through two pad delays
+    // and the flash tCLQV. Stretch Flash-only SCK half periods to two core
+    // clocks (~7.5MHz SCK), leaving PSRAM at its original speed so its
+    // <6us continuous CS-low budget is unaffected. Gate every QSPI FSM,
+    // address/data shift and stream-early strobe with the same qspi_step.
+    reg flash_half_step;
+    wire qspi_step = spi_flash_select ? 1'b1 : flash_half_step;
+    always @(posedge clk) begin
+        if (!rstn || spi_flash_select || fsm_state == FSM_IDLE ||
+            fsm_state == FSM_STALLED || fsm_state == FSM_TURNAROUND)
+            flash_half_step <= 1'b0;
+        else
+            flash_half_step <= ~flash_half_step;
+    end
+
     // For a QPI write, nibbles_remaining==1 with spi_clk_out high is the
     // half-cycle immediately before the existing data_req pulse. This is the
     // correct point for a ready/valid producer to advance to its next byte.
@@ -87,6 +102,7 @@ module qspi_controller (
         is_writing &&
         (fsm_state == FSM_DATA) &&
         spi_clk_out &&
+        qspi_step &&
         (nibbles_remaining == 3'd1);
 
     reg stop_txn_reg;
@@ -154,10 +170,12 @@ module qspi_controller (
                     spi_ram_b_select <= addr_in[24:23] != 2'b11;
                 end
             end else begin
-                if (read_cycles_count == 0)
-                    read_cycles_count <= 3'b001;
-                else
-                    read_cycles_count <= read_cycles_count - 3'b001;
+                if (fsm_state == FSM_STALLED || qspi_step) begin
+                    if (read_cycles_count == 0)
+                        read_cycles_count <= 3'b001;
+                    else
+                        read_cycles_count <= read_cycles_count - 3'b001;
+                end
 
                 if (fsm_state == FSM_STALLED) begin
                     spi_clk_out <= 0;
@@ -171,7 +189,7 @@ module qspi_controller (
                             read_cycles_count <= {1'b0, delay_cycles_cfg[2], delay_cycles_cfg[0]};
                         end
                     end
-                end else begin
+                end else if (qspi_step) begin
                     spi_clk_out <= !spi_clk_out;
                     if (((fsm_state == FSM_DATA && !is_writing) || fsm_state == FSM_STALL_RECOVER) ?
                         (read_cycles_count == 0) : spi_clk_out) begin
@@ -242,7 +260,7 @@ module qspi_controller (
             // avoids a deep CPU-control-to-QSPI address critical path.
             // A23 is the PSRAM bank selector, not a physical address bit.
             addr <= {addr_in[24] ? 1'b0 : addr_in[23], addr_in[22:0]};
-        end else if (fsm_state == FSM_ADDR && spi_clk_out) begin
+        end else if (fsm_state == FSM_ADDR && spi_clk_out && qspi_step) begin
             addr <= {addr[ADDR_BITS-5:0], 4'b0000};
         end
     end
@@ -251,18 +269,18 @@ module qspi_controller (
         if (is_writing) begin
             if (fsm_state == FSM_STALLED) begin
                 data <= data_in;
-            end else if (spi_clk_out) begin
+            end else if (spi_clk_out && qspi_step) begin
                 if (nibbles_remaining == 0) begin
                     data <= data_in;
                 end else if (fsm_state == FSM_DATA) begin
                     data <= {data[DATA_WIDTH_BITS-5:0], spi_data_in};
                 end
             end
-        end else if (read_cycles_count == 0 && fsm_state == FSM_DATA) begin
+        end else if (qspi_step && read_cycles_count == 0 && fsm_state == FSM_DATA) begin
             data <= {data[DATA_WIDTH_BITS-5:0], spi_data_in};
-        end else if (read_cycles_count == 3'b010 && fsm_state == FSM_STALL_RECOVER) begin
+        end else if (qspi_step && read_cycles_count == 3'b010 && fsm_state == FSM_STALL_RECOVER) begin
             data <= {data[DATA_WIDTH_BITS-5:0], spi_in_buffer[7:4]};
-        end else if (read_cycles_count == 0 && fsm_state == FSM_STALL_RECOVER) begin
+        end else if (qspi_step && read_cycles_count == 0 && fsm_state == FSM_STALL_RECOVER) begin
             data <= {data[DATA_WIDTH_BITS-5:0], spi_in_buffer[3:0]};
         end else if (read_cycles_count[2:1] != 2'b00 && read_cycles_count[0] == 1'b0 && fsm_state == FSM_STALLED) begin
             spi_in_buffer <= {spi_in_buffer[3:0], spi_data_in};

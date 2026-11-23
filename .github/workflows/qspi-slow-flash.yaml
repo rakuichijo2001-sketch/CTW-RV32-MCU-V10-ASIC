@@ -1,0 +1,27 @@
+name: qspi-slow-flash-30mhz
+on: [push, workflow_dispatch]
+jobs:
+  sweep:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update && sudo apt-get install -y iverilog
+      - name: Flash 2x clock half-period, test startup IRQ image
+        shell: bash
+        run: |
+          set -e
+          mkdir -p build
+          for timed in 0 1; do
+            for cfg in 0 1 2 3; do
+              echo "==== FLASH_SCK_DIV2 timed=$timed cfg=$cfg ===="
+              opts="-DASIC -DIRQ_SMOKE -DFIRST_FETCH_CHECK"
+              if [ "$timed" = 1 ]; then opts="$opts -DDATASHEET_TIMING"; fi
+              iverilog -g2012 $opts -Ptb_v3.QSPI_CFG=$cfg -s tb_v3 -o build/fs-$timed-$cfg src/*.v fpga/*.sv test/reference/timed_memory_fixture.sv test/reference/psram_pin_reference.sv test/tb_v3.sv
+              set +e
+              vvp build/fs-$timed-$cfg
+              st=$?
+              set -e
+              echo "FLASH_SCK_DIV2_RESULT timed=$timed cfg=$cfg exit=$st"
+            done
+          done
