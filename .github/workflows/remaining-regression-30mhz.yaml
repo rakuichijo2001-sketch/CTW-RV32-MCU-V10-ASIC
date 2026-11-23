@@ -1,0 +1,17 @@
+name: remaining-regression-30mhz
+on: [push, workflow_dispatch]
+jobs:
+  ram_guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update && sudo apt-get install -y iverilog
+      - run: make test-ram-guard
+  remaining:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get update && sudo apt-get install -y iverilog yosys
+      - run: make test-timing test-sensor-asic test-sensor-pc test-pinout gate gate-irq test-v10-watchdog test-v9-rtl test-v10-python
